@@ -2,22 +2,44 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.CommandLine;
+    using System.CommandLine.Invocation;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
+    using System.Threading.Tasks;
 
     public class Program
     {
-        private const string HighLibraryName = "HighLevel.dll";
-
-        private static int h;
-
-        public static void Run()
+        public static async Task Main(string[] args)
         {
-            Console.WriteLine("Standard deviation?");
-            h = int.Parse(GetInput(x => !int.TryParse(x, out var output)));
+            var inputOption = new Option<FileInfo>("-i", "Input file")
+            {
+                IsRequired = true,
+            }.ExistingOnly();
+            var deviationOption = new Option<int>("-d", "Standard deviation")
+            {
+                IsRequired = true,
+            };
+            var rootCommand = new RootCommand ("NLM")
+            {
+                inputOption,
+                deviationOption,
+            };
 
-            var library = Implementation.OpenImplementation(HighLibraryName);
+            var program = new Program();
+            rootCommand.Handler = CommandHandler.Create<FileInfo, int>((i, d) =>
+            {
+                var fileName = i.FullName;
+                program.Run(fileName, d);
+            });
+
+            await rootCommand.InvokeAsync(args);
+        }
+
+        public void Run(string input, int h)
+        {
+            var library = new Implementation();
             if (library == null)
             {
                 Console.WriteLine("Failed to open library.");
@@ -25,29 +47,18 @@
             else
             {
                 long elapsed;
-                using (library)
+                Bitmap output;
+                Console.WriteLine(input);
+                var combined = new Bitmap(input);
+                var revealed = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
+                using (var decoder = new Denoiser(combined, library))
                 {
-                    elapsed = RevealMessage(library);
+                    elapsed = decoder.Denoise(h, out output);
                 }
+
+                output.Save($"{revealed}.png");
                 Console.WriteLine("Completed in {0} ticks.", elapsed);
             }
-        }
-
-        public static long RevealMessage(Implementation library)
-        {
-            long elapsed;
-            Bitmap output;
-            Console.WriteLine("What is the name of the combined image (WITH extension)?");
-            var combined = new Bitmap(GetInput(x => !Try(() => new Bitmap(Image.FromFile(x ?? string.Empty)))));
-            Console.WriteLine("What should be the name of the revealed image (WITHOUT extension)?");
-            var revealed = GetInput(x => x.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0);
-            using (var decoder = new Denoiser(combined, library))
-            {
-                elapsed = decoder.Denoise(h, 1, out output);
-            }
-
-            output.Save($"{revealed}.png");
-            return elapsed;
         }
 
         public static int GetBytesPerPixel(PixelFormat pixelFormat)
@@ -59,44 +70,12 @@
                 case PixelFormat.Format32bppArgb:
                 case PixelFormat.Format32bppPArgb:
                 case PixelFormat.Format32bppRgb:
+                case PixelFormat.Format4bppIndexed:
                     return 4;
                 default:
+                    Console.WriteLine("{0}", pixelFormat);
                     throw new ArgumentException("Only 24 and 32 bit images are supported");
             }
-        }
-
-        private static string GetInput(Predicate<string> validation)
-        {
-            string input;
-            bool error;
-            do
-            {
-                Console.Write("> ");
-                input = Console.ReadLine();
-                error = validation(input);
-                if (error)
-                {
-                    Console.SetCursorPosition(0, Console.CursorTop - 1);
-                    Console.Write(new string(' ', Console.WindowWidth));
-                    Console.SetCursorPosition(0, Console.CursorTop - 1);
-                }
-            }
-            while (error);
-
-            return input;
-        }
-
-        private static bool Try(Action action)
-        {
-            try
-            {
-                action();
-            }
-            catch
-            {
-                return false;
-            }
-            return true;
         }
     }
 }
