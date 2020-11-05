@@ -4,7 +4,6 @@ namespace NLMBase
     using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Imaging;
-    using System.Threading.Tasks;
 
     public unsafe class Denoiser : IDisposable
     {
@@ -12,45 +11,56 @@ namespace NLMBase
 
         private readonly int height;
 
-        private readonly int combinedStride;
+        private readonly int inputStride;
 
-        private readonly byte* combinedOrigin;
+        private readonly byte* inputOrigin;
 
-        private readonly int combinedBytesPerPixel;
+        private readonly PixelFormat inputPixelFormat;
+
+        private readonly int inputBytesPerPixel;
 
         private readonly Action disposeAction;
 
         private readonly Implementation library;
 
-        public Denoiser(Bitmap combined, Implementation library)
+        public Denoiser(Bitmap input, Implementation library)
         {
-            this.width = Math.Min(combined.Width, combined.Width);
-            this.height = Math.Min(combined.Height, combined.Height);
-            var combinedData = combined.LockBits(
-                new Rectangle(0, 0, combined.Width, combined.Height),
+            this.width = Math.Min(input.Width, input.Width);
+            this.height = Math.Min(input.Height, input.Height);
+            var inputData = input.LockBits(
+                new Rectangle(0, 0, input.Width, input.Height),
                 ImageLockMode.ReadOnly,
-                combined.PixelFormat);
-            this.combinedStride = combinedData.Stride;
-            this.combinedBytesPerPixel = Program.GetBytesPerPixel(combinedData.PixelFormat);
-            this.combinedOrigin = (byte*)combinedData.Scan0.ToPointer();
+                input.PixelFormat);
+            this.inputStride = inputData.Stride;
+            this.inputPixelFormat = inputData.PixelFormat;
+            this.inputBytesPerPixel = Image.GetPixelFormatSize(inputData.PixelFormat) / 8;
+            this.inputOrigin = (byte*)inputData.Scan0.ToPointer();
             this.disposeAction = () =>
                 {
-                    combined.UnlockBits(combinedData);
+                    input.UnlockBits(inputData);
                 };
             this.library = library;
         }
 
-        public long Denoise(int h, out Bitmap result)
+        public long Denoise(int sigma, out Bitmap noisy, out Bitmap result)
         {
-            result = new Bitmap(this.width, this.height);
-            var resultData = result.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, result.PixelFormat);
+            noisy = new Bitmap(this.width, this.height, inputPixelFormat);
+            var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
+            var noisyOrigin = (byte*)noisyData.Scan0.ToPointer();
+
+            this.Noise(this.inputOrigin, noisyOrigin, this.height * noisyData.Stride, sigma);
+
+            result = new Bitmap(this.width, this.height, inputPixelFormat);
+            var resultData = result.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
             var resultOrigin = (byte*)resultData.Scan0.ToPointer();
-            var rectangle = new Rectangle(0, 0, this.width, this.height);
 
             var watch = Stopwatch.StartNew();
-            this.library.Denoise(this.combinedOrigin + (rectangle.Y * resultData.Stride), resultOrigin + (rectangle.Y * resultData.Stride), rectangle.Height * resultData.Stride, h);
+            this.library.Denoise(noisyOrigin, resultOrigin, this.height * resultData.Stride, sigma);
             watch.Stop();
 
+            Console.WriteLine($"Color [R={noisyOrigin[0]}, G={noisyOrigin[1]}, B={noisyOrigin[2]}]");
+            noisy.UnlockBits(noisyData);
+            Console.WriteLine(noisy.GetPixel(0, 0));
             result.UnlockBits(resultData);
             return watch.ElapsedTicks;
         }
@@ -58,6 +68,19 @@ namespace NLMBase
         public void Dispose()
         {
             this.disposeAction();
+        }
+
+        private void Noise(byte* inputPointer, byte* outputPointer, int length, int sigma)
+        {
+            var random = new Random();
+            for (var i = 0; i < length; ++i)
+            {
+                //var a = random.NextDouble();
+                //var b = random.NextDouble();
+                //var noise = (double)(sigma) * Math.Sqrt(-2.0 * Math.Log(a)) * Math.Cos(2.0 * Math.PI * b);
+                //outputPointer[i] = (byte)((double)inputPointer[i] + noise);
+                outputPointer[i] = inputPointer[i];
+            }
         }
     }
 }
