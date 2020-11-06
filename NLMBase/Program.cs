@@ -48,10 +48,9 @@
                 var output = (Bitmap)null;
                 var input = new Bitmap(inputName);
                 var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
-                using (var denoiser = new Denoiser(input, library))
-                {
-                    denoiser.Denoise(sigma, out noisy, out output);
-                }
+
+                var denoiser = new Denoiser(input, library);
+                denoiser.Denoise(sigma, out noisy, out output);
                 
                 noisy.Save($"noisy-{timeStamp}.png");
                 output.Save($"filtered-{timeStamp}.png");

@@ -4,8 +4,9 @@ namespace NLMBase
     using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Runtime.InteropServices;
 
-    public unsafe class Denoiser : IDisposable
+    public unsafe class Denoiser
     {
         private readonly int width;
 
@@ -13,13 +14,9 @@ namespace NLMBase
 
         private readonly int inputStride;
 
-        private readonly byte* inputOrigin;
+        private readonly byte[] inputArray;
 
         private readonly PixelFormat inputPixelFormat;
-
-        private readonly int inputBytesPerPixel;
-
-        private readonly Action disposeAction;
 
         private readonly Implementation library;
 
@@ -33,12 +30,11 @@ namespace NLMBase
                 input.PixelFormat);
             this.inputStride = inputData.Stride;
             this.inputPixelFormat = inputData.PixelFormat;
-            this.inputBytesPerPixel = Image.GetPixelFormatSize(inputData.PixelFormat) / 8;
-            this.inputOrigin = (byte*)inputData.Scan0.ToPointer();
-            this.disposeAction = () =>
-                {
-                    input.UnlockBits(inputData);
-                };
+            var inputOrigin = inputData.Scan0;
+            var inputLength = Math.Abs(inputData.Stride) * inputData.Height;
+            this.inputArray = new byte[inputLength];
+            Marshal.Copy(inputOrigin, this.inputArray, 0, inputLength);
+            input.UnlockBits(inputData);
             this.library = library;
         }
 
@@ -46,31 +42,33 @@ namespace NLMBase
         {
             noisy = new Bitmap(this.width, this.height, inputPixelFormat);
             var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
-            var noisyOrigin = (byte*)noisyData.Scan0.ToPointer();
+            var noisyOrigin = noisyData.Scan0;
+            var noisyLength = Math.Abs(noisyData.Stride) * noisyData.Height;
+            var noisyArray = new byte[noisyLength];
+            Marshal.Copy(noisyOrigin, noisyArray, 0, noisyLength);
 
-            this.Noise(this.inputOrigin, noisyOrigin, this.height * noisyData.Stride, sigma);
+            this.Noise(this.inputArray, noisyArray, noisyLength, sigma);
 
             result = new Bitmap(this.width, this.height, inputPixelFormat);
             var resultData = result.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
-            var resultOrigin = (byte*)resultData.Scan0.ToPointer();
+            var resultOrigin = resultData.Scan0;
+            var resultLength = Math.Abs(resultData.Stride) * resultData.Height;
+            var resultArray = new byte[resultLength];
+            Marshal.Copy(resultOrigin, resultArray, 0, resultLength);
 
             var watch = Stopwatch.StartNew();
-            this.library.Denoise(noisyOrigin, resultOrigin, this.height * resultData.Stride, sigma);
+            this.library.Denoise(noisyArray, resultArray, resultLength, sigma);
             watch.Stop();
 
-            Console.WriteLine($"Color [R={noisyOrigin[0]}, G={noisyOrigin[1]}, B={noisyOrigin[2]}]");
+            Marshal.Copy(noisyArray, 0, noisyOrigin, noisyLength);
+            Marshal.Copy(resultArray, 0, resultOrigin, resultLength);
+
             noisy.UnlockBits(noisyData);
-            Console.WriteLine(noisy.GetPixel(0, 0));
             result.UnlockBits(resultData);
             return watch.ElapsedTicks;
         }
 
-        public void Dispose()
-        {
-            this.disposeAction();
-        }
-
-        private void Noise(byte* inputPointer, byte* outputPointer, int length, int sigma)
+        private void Noise(byte[] inputPointer, byte[] outputPointer, int length, int sigma)
         {
             var random = new Random();
             for (var i = 0; i < length; ++i)
