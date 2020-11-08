@@ -73,11 +73,11 @@ namespace NLMBase
             var random = new Random();
             for (var i = 0; i < length; ++i)
             {
-                //var a = random.NextDouble();
-                //var b = random.NextDouble();
-                //var noise = (double)(sigma) * Math.Sqrt(-2.0 * Math.Log(a)) * Math.Cos(2.0 * Math.PI * b);
-                //outputPointer[i] = (byte)((double)inputPointer[i] + noise);
-                outputPointer[i] = inputPointer[i];
+                var a = random.NextDouble();
+                var b = random.NextDouble();
+                var noise = (double)(sigma) * Math.Sqrt(-2.0 * Math.Log(a)) * Math.Cos(2.0 * Math.PI * b);
+                var value = ((double)inputPointer[i] + noise);
+                outputPointer[i] = (byte)Math.Clamp(Math.Floor(value + 0.5), 0.0, 255.0);
             }
         }
     }

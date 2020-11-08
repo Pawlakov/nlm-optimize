@@ -12,7 +12,7 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
             "args": [
-                "-i", "fanart.png",
+                "-i", "osmosis.png",
                 "-s", "100"
              ],
             "cwd": "${workspaceFolder}",
