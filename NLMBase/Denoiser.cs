@@ -18,7 +18,7 @@ namespace NLMBase
 
         private readonly int channels;
 
-        private readonly float[][] inputChannels;
+        private readonly float[] inputChannels;
 
         private readonly PixelFormat pixelFormat;
 
@@ -72,23 +72,20 @@ namespace NLMBase
             return watch.ElapsedTicks;
         }
 
-        private void Noise(float[][] inputPointer, float[][] outputPointer, int sigma)
+        private void Noise(float[] inputPointer, float[] outputPointer, int sigma)
         {
             var random = new Random();
-            var channelSize = this.width * this.height;
-            for (var i = 0; i < this.channels; ++i)
+            var size = this.width * this.height * this.channels;
+            for (var i = 0; i < size; ++i)
             {
-                for (var j = 0; j < channelSize; ++j)
-                {
-                    var a = random.NextDouble();
-                    var b = random.NextDouble();
-                    var noise = (float)(sigma * Math.Sqrt(-2.0 * Math.Log(a)) * Math.Cos(2.0 * Math.PI * b));
-                    outputPointer[i][j] = (float)inputPointer[i][j] + noise;
-                }
+                var a = random.NextDouble();
+                var b = random.NextDouble();
+                var noise = (float)(sigma * Math.Sqrt(-2.0 * Math.Log(a)) * Math.Cos(2.0 * Math.PI * b));
+                outputPointer[i] = (float)inputPointer[i] + noise;
             }
         }
 
-        private void Denoise(float[][] inputPointer, float[][] outputPointer, int sigma)
+        private void Denoise(float[] inputArray, float[] outputArray, int sigma)
         {
             var win = 0;
             var bloc = 0;
@@ -156,20 +153,22 @@ namespace NLMBase
                 }
             }
 
-            this.library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, this.channels, this.width, this.height);
+            fixed (float* inputPointer = &inputArray[0], outputPointer = &outputArray[0])
+            {
+                this.library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, this.channels, this.width, this.height);
+            }
         }
 
-        private float[][] UnwrapChannels(byte[] input)
+        private float[] UnwrapChannels(byte[] input)
         {
-            var output = new float[this.channels][];
+            var output = new float[this.channels * this.width * this.height];
             for (var i = 0; i < this.channels; ++i)
             {
-                output[i] = new float[this.width * this.height];
                 for (var j = 0; j < this.height; ++j)
                 {
                     for (var k = 0; k < this.width; ++k)
                     {
-                        output[i][j * this.width + k] = input[j * this.stride + k * this.channels + i];
+                        output[this.width * (this.height * i + j) + k] = input[j * this.stride + k * this.channels + i];
                     }
                 }
             }
@@ -177,7 +176,7 @@ namespace NLMBase
             return output;
         }
 
-        private byte[] WrapChannels(float[][] input)
+        private byte[] WrapChannels(float[] input)
         {
             var output = new byte[this.length];
             for (var i = 0; i < this.channels; ++i)
@@ -186,7 +185,7 @@ namespace NLMBase
                 {
                     for (var k = 0; k < this.width; ++k)
                     {
-                        var value = input[i][j * this.width + k];
+                        var value = input[this.width * (this.height * i + j) + k];
                         output[j * this.stride + k * this.channels + i] = (byte)Math.Clamp(Math.Floor(value + 0.5), 0.0, 255.0);
                     }
                 }
@@ -195,13 +194,9 @@ namespace NLMBase
             return output;
         }
 
-        private float[][] MakeEmptyChannels()
+        private float[] MakeEmptyChannels()
         {
-            var resultChannels = new float[this.channels][];
-            for (var i = 0; i < this.channels; ++i)
-            {
-                resultChannels[i] = new float[this.width * this.height];
-            }
+            var resultChannels = new float[this.channels * this.width * this.height];
 
             return resultChannels;
         }

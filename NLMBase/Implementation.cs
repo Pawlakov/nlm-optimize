@@ -17,7 +17,7 @@ namespace NLMBase
         // fFiltPar Filtering parameter
         // fpI      Input
         // fpO      Output
-        public void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float[][] fpI, float[][] fpO, int iChannels, int iWidth, int iHeight)
+        public void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float* fpI, float* fpO, int iChannels, int iWidth, int iHeight)
         {
             // length of each channel
             var iwxh = iWidth * iHeight;
@@ -87,7 +87,7 @@ namespace NLMBase
                         {
                             if (i != x || j != y)
                             {
-                                var fDif = fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth);
+                                var fDif = fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth, iwxh);
 
                                 // dif^2 - 2 * fSigma^2 * N      dif is not normalized
                                 fDif = Math.Max(fDif - 2.0f * (float)icwl * fSigma2, 0.0f);
@@ -112,7 +112,7 @@ namespace NLMBase
 
                                         for (var ii = 0; ii < iChannels; ii++)
                                         {
-                                            fpODenoised[ii][iindex] += fWeight * fpI[ii][il];
+                                            fpODenoised[ii][iindex] += fWeight * fpI[ii * iwxh + il];
                                         }
                                     }
                                 }
@@ -133,7 +133,7 @@ namespace NLMBase
 
                             for (var ii = 0; ii < iChannels; ii++)
                             {
-                                fpODenoised[ii][iindex] += fMaxWeight * fpI[ii][il];
+                                fpODenoised[ii][iindex] += fMaxWeight * fpI[ii * iwxh + il];
                             }
                         }
                     }
@@ -157,7 +157,7 @@ namespace NLMBase
 
                                 for (var ii = 0; ii < iChannels; ii++)
                                 {
-                                    fpO[ii][il] += fpODenoised[ii][iindex] / fTotalWeight;
+                                    fpO[ii * iwxh + il] += fpODenoised[ii][iindex] / fTotalWeight;
                                 }
                             }
                         }
@@ -170,11 +170,17 @@ namespace NLMBase
             {
                 if (fpCount[ii] > 0.0)
                 {
-                    for (int jj = 0; jj < iChannels; jj++) fpO[jj][ii] /= fpCount[ii];
+                    for (int jj = 0; jj < iChannels; jj++)
+                    {
+                        fpO[jj * iwxh + ii] /= fpCount[ii];
+                    }
                 }
                 else
                 {
-                    for (int jj = 0; jj < iChannels; jj++) fpO[jj][ii] = fpI[jj][ii];
+                    for (int jj = 0; jj < iChannels; jj++)
+                    {
+                        fpO[jj * iwxh + ii] = fpI[jj * iwxh + ii];
+                    }
                 }
             }
         }
@@ -202,19 +208,19 @@ namespace NLMBase
             return y1 + (y2 - y1) * (dif * LUTPRECISION - x);
         }
 
-        private float fiL2FloatDist(float[][] u0, float[][] u1, int i0, int j0, int i1, int j1, int radius, int channels, int width0, int width1)
+        private float fiL2FloatDist(float* u0, float* u1, int i0, int j0, int i1, int j1, int radius, int channels, int width0, int width1, int iwxh)
         {
             var dif = 0.0f;
 
             for (var ii = 0; ii < channels; ii++)
             {
-                dif += fiL2FloatDist(u0[ii], u1[ii], i0, j0, i1, j1, radius, width0, width1);
+                dif += fiL2FloatDist(&u0[ii * iwxh], &u1[ii * iwxh], i0, j0, i1, j1, radius, width0, width1);
             }
 
             return dif;
         }
 
-        private float fiL2FloatDist(float[] u0, float[] u1, int i0, int j0, int i1, int j1, int radius, int width0, int width1)
+        private float fiL2FloatDist(float* u0, float* u1, int i0, int j0, int i1, int j1, int radius, int width0, int width1)
         {
             var dist = 0.0f;
             for (var s = -radius; s <= radius; s++)
