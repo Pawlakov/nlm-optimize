@@ -22,9 +22,9 @@ namespace NLMBase
 
         private readonly PixelFormat pixelFormat;
 
-        private readonly Implementation library;
+        private readonly IImplementation library;
 
-        public Denoiser(Bitmap input, Implementation library)
+        public Denoiser(Bitmap input, IImplementation library)
         {
             this.width = Math.Min(input.Width, input.Width);
             this.height = Math.Min(input.Height, input.Height);

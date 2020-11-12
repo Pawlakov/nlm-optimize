@@ -37,23 +37,25 @@
 
         public void Run(string inputName, int sigma)
         {
-            var library = new Implementation();
-            if (library == null)
+            using (var library = (IImplementation)ExternalImplementation.OpenImplementation("NLMBasic.dll") ?? new DefaultImplementation())
             {
-                Console.WriteLine("Failed to open library.");
-            }
-            else
-            {
-                var noisy = (Bitmap)null;
-                var output = (Bitmap)null;
-                var input = new Bitmap(inputName);
-                var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
+                if (library == null)
+                {
+                    Console.WriteLine("Failed to open library.");
+                }
+                else
+                {
+                    var noisy = (Bitmap)null;
+                    var output = (Bitmap)null;
+                    var input = new Bitmap(inputName);
+                    var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
 
-                var denoiser = new Denoiser(input, library);
-                denoiser.Work(sigma, out noisy, out output);
-                
-                noisy.Save($"noisy-{timeStamp}.png");
-                output.Save($"filtered-{timeStamp}.png");
+                    var denoiser = new Denoiser(input, library);
+                    denoiser.Work(sigma, out noisy, out output);
+
+                    noisy.Save($"noisy-{timeStamp}.png");
+                    output.Save($"filtered-{timeStamp}.png");
+                }
             }
         }
     }

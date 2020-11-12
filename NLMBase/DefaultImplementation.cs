@@ -2,7 +2,7 @@ using System;
 
 namespace NLMBase
 {
-    public unsafe class Implementation
+    public unsafe class DefaultImplementation : IImplementation
     {
         private const float LUTMAX = 30.0f;
         private const float LUTMAXM1 = 29.0f;
@@ -17,7 +17,13 @@ namespace NLMBase
         // fFiltPar Filtering parameter
         // fpI      Input
         // fpO      Output
-        public void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float* fpI, float* fpO, int iChannels, int iWidth, int iHeight)
+        public DenoiseFunction Denoise => DenoiseBody;
+
+        public void Dispose()
+        {
+        }
+
+        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float* fpI, float* fpO, int iChannels, int iWidth, int iHeight)
         {
             // length of each channel
             var iwxh = iWidth * iHeight;
