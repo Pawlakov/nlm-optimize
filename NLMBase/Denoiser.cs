@@ -1,10 +1,12 @@
 namespace NLMBase
 {
+    using MersenneTwister;
     using System;
     using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Runtime.InteropServices;
+    using System.Threading;
 
     public unsafe class Denoiser
     {
@@ -44,7 +46,7 @@ namespace NLMBase
             this.library = library;
         }
 
-        public long Work(int sigma, out Bitmap noisy, out Bitmap result)
+        public long Work(int sigma, out Bitmap noisy, out Bitmap result, out float mseNoisy, out float mseResult)
         {
             var noisyChannels = MakeEmptyChannels();
             this.Noise(this.inputChannels, noisyChannels, sigma);
@@ -69,12 +71,15 @@ namespace NLMBase
             Marshal.Copy(resultArray, 0, resultOrigin, this.length);
             result.UnlockBits(resultData);
 
+            mseResult = this.MSE(this.inputChannels, resultChannels);
+            mseNoisy = this.MSE(this.inputChannels, noisyChannels);
+
             return watch.ElapsedTicks;
         }
 
         private void Noise(float[] inputPointer, float[] outputPointer, int sigma)
         {
-            var random = new Random();
+            var random = Randoms.Create(DateTime.Now.Millisecond + Thread.CurrentThread.ManagedThreadId, RandomType.FastestDouble);
             var size = this.width * this.height * this.channels;
             for (var i = 0; i < size; ++i)
             {
@@ -168,6 +173,19 @@ namespace NLMBase
                     this.library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, this.channels, this.width, this.height);
                 }
             }
+        }
+
+        private float MSE(float[] firstArray, float[] secondArray)
+        {
+            var size = this.width * this.height * this.channels;
+            var sum = 0.0f;
+            for (var i = 0; i < size; ++i)
+            {
+                var distance = (firstArray[i] - secondArray[i]) / 255;
+                sum += (distance * distance);
+            }
+
+            return sum / size;
         }
 
         private float[] UnwrapChannels(byte[] input)
