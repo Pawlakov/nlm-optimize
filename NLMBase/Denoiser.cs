@@ -153,9 +153,20 @@ namespace NLMBase
                 }
             }
 
-            fixed (float* inputPointer = &inputArray[0], outputPointer = &outputArray[0])
+            fixed (float* inputFlatPointer = &inputArray[0], outputFlatPointer = &outputArray[0])
             {
-                this.library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, this.channels, this.width, this.height);
+                var fpI = new float*[this.channels];
+                var fpO = new float*[this.channels];
+                for (int ii = 0; ii < this.channels; ii++)
+                {
+                    fpI[ii] = &inputFlatPointer[ii * this.width * this.height];
+                    fpO[ii] = &outputFlatPointer[ii * this.width * this.height];
+                }
+
+                fixed (float** inputPointer = &fpI[0], outputPointer = &fpO[0])
+                {
+                    this.library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, this.channels, this.width, this.height);
+                }
             }
         }
 

@@ -19,44 +19,62 @@
             {
                 IsRequired = true,
             };
+            var libraryOption = new Option<FileInfo>("-l", "Denoising library")
+            {
+                IsRequired = false,
+            }.ExistingOnly();
             var rootCommand = new RootCommand ("NLM")
             {
                 inputOption,
                 deviationOption,
+                libraryOption,
             };
 
             var program = new Program();
-            rootCommand.Handler = CommandHandler.Create<FileInfo, int>((i, s) =>
+            rootCommand.Handler = CommandHandler.Create<FileInfo, int, FileInfo>((i, s, l) =>
             {
                 var fileName = i.FullName;
-                program.Run(fileName, s);
+                var libraryName = l?.FullName;
+                program.Run(fileName, s, libraryName);
             });
 
             await rootCommand.InvokeAsync(args);
+
+            Console.Write("Press any key to continue.");
+            Console.ReadKey();
         }
 
-        public void Run(string inputName, int sigma)
+        public void Run(string inputName, int sigma, string libraryName)
         {
-            using (var library = (IImplementation)ExternalImplementation.OpenImplementation("NLMBasic.dll") ?? new DefaultImplementation())
+            var library = (IImplementation)null;
+
+            if (libraryName != null)
             {
+                library = ExternalImplementation.OpenImplementation(libraryName);
                 if (library == null)
                 {
-                    Console.WriteLine("Failed to open library.");
-                }
-                else
-                {
-                    var noisy = (Bitmap)null;
-                    var output = (Bitmap)null;
-                    var input = new Bitmap(inputName);
-                    var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
-
-                    var denoiser = new Denoiser(input, library);
-                    denoiser.Work(sigma, out noisy, out output);
-
-                    noisy.Save($"noisy-{timeStamp}.png");
-                    output.Save($"filtered-{timeStamp}.png");
+                    Console.WriteLine("Failed to open dynamic library. Using default implementation.");
                 }
             }
+
+            if (library == null)
+            {
+                library = new DefaultImplementation();
+            }
+
+            var noisy = (Bitmap)null;
+            var output = (Bitmap)null;
+            var input = new Bitmap(inputName);
+            var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
+
+            var denoiser = new Denoiser(input, library);
+            var ticksElapsed = denoiser.Work(sigma, out noisy, out output);
+            Console.WriteLine("Time elapsed: {0}", TimeSpan.FromTicks(ticksElapsed));
+
+            noisy.Save($"noisy-{timeStamp}.png");
+            output.Save($"filtered-{timeStamp}.png");
+
+            library.Dispose();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NLMBase
             this.Denoise = Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(DenoiseFunction)) as DenoiseFunction;
         }
 
-        public static ExternalImplementation OpenImplementation(string libraryName)
+        public static IImplementation OpenImplementation(string libraryName)
         {
             try
             {

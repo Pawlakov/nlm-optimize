@@ -23,7 +23,7 @@ namespace NLMBase
         {
         }
 
-        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float* fpI, float* fpO, int iChannels, int iWidth, int iHeight)
+        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
         {
             // length of each channel
             var iwxh = iWidth * iHeight;
@@ -93,7 +93,7 @@ namespace NLMBase
                         {
                             if (i != x || j != y)
                             {
-                                var fDif = fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth, iwxh);
+                                var fDif = fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth);
 
                                 // dif^2 - 2 * fSigma^2 * N      dif is not normalized
                                 fDif = Math.Max(fDif - 2.0f * (float)icwl * fSigma2, 0.0f);
@@ -118,7 +118,7 @@ namespace NLMBase
 
                                         for (var ii = 0; ii < iChannels; ii++)
                                         {
-                                            fpODenoised[ii][iindex] += fWeight * fpI[ii * iwxh + il];
+                                            fpODenoised[ii][iindex] += fWeight * fpI[ii][il];
                                         }
                                     }
                                 }
@@ -139,7 +139,7 @@ namespace NLMBase
 
                             for (var ii = 0; ii < iChannels; ii++)
                             {
-                                fpODenoised[ii][iindex] += fMaxWeight * fpI[ii * iwxh + il];
+                                fpODenoised[ii][iindex] += fMaxWeight * fpI[ii][il];
                             }
                         }
                     }
@@ -163,7 +163,7 @@ namespace NLMBase
 
                                 for (var ii = 0; ii < iChannels; ii++)
                                 {
-                                    fpO[ii * iwxh + il] += fpODenoised[ii][iindex] / fTotalWeight;
+                                    fpO[ii][il] += fpODenoised[ii][iindex] / fTotalWeight;
                                 }
                             }
                         }
@@ -178,14 +178,14 @@ namespace NLMBase
                 {
                     for (int jj = 0; jj < iChannels; jj++)
                     {
-                        fpO[jj * iwxh + ii] /= fpCount[ii];
+                        fpO[jj][ii] /= fpCount[ii];
                     }
                 }
                 else
                 {
                     for (int jj = 0; jj < iChannels; jj++)
                     {
-                        fpO[jj * iwxh + ii] = fpI[jj * iwxh + ii];
+                        fpO[jj][ii] = fpI[jj][ii];
                     }
                 }
             }
@@ -214,13 +214,13 @@ namespace NLMBase
             return y1 + (y2 - y1) * (dif * LUTPRECISION - x);
         }
 
-        private float fiL2FloatDist(float* u0, float* u1, int i0, int j0, int i1, int j1, int radius, int channels, int width0, int width1, int iwxh)
+        private float fiL2FloatDist(float** u0, float** u1, int i0, int j0, int i1, int j1, int radius, int channels, int width0, int width1)
         {
             var dif = 0.0f;
 
             for (var ii = 0; ii < channels; ii++)
             {
-                dif += fiL2FloatDist(&u0[ii * iwxh], &u1[ii * iwxh], i0, j0, i1, j1, radius, width0, width1);
+                dif += fiL2FloatDist(u0[ii], u1[ii], i0, j0, i1, j1, radius, width0, width1);
             }
 
             return dif;
@@ -229,17 +229,17 @@ namespace NLMBase
         private float fiL2FloatDist(float* u0, float* u1, int i0, int j0, int i1, int j1, int radius, int width0, int width1)
         {
             var dist = 0.0f;
-            for (var s = -radius; s <= radius; s++)
+            for (int s = -radius; s <= radius; s++)
             {
                 var l = (j0 + s) * width0 + (i0 - radius);
-                var ptr0 = l;
+                var ptr0 = &u0[l];
 
                 l = (j1 + s) * width1 + (i1 - radius);
-                var ptr1 = l;
+                var ptr1 = &u1[l];
 
-                for (int r = -radius; r <= radius; r++, ptr0++, ptr1++)
+                for (var r = -radius; r <= radius; r++, ptr0++, ptr1++)
                 {
-                    var dif = u0[ptr0] - u1[ptr1];
+                    var dif = (*ptr0 - *ptr1);
                     dist += (dif * dif);
                 }
             }
