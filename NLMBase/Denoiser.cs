@@ -46,7 +46,7 @@ namespace NLMBase
             this.library = library;
         }
 
-        public long Work(int sigma, out Bitmap noisy, out Bitmap result, out float mseNoisy, out float mseResult)
+        public long Work(int sigma, out Bitmap noisy, out Bitmap result, out float mseNoisy, out float mseResult, out float ssimNoisy, out float ssimResult)
         {
             var noisyChannels = MakeEmptyChannels();
             this.Noise(this.inputChannels, noisyChannels, sigma);
@@ -73,6 +73,8 @@ namespace NLMBase
 
             mseResult = this.MSE(this.inputChannels, resultChannels);
             mseNoisy = this.MSE(this.inputChannels, noisyChannels);
+            ssimResult = this.SSIM(this.inputChannels, resultChannels);
+            ssimNoisy = this.SSIM(this.inputChannels, noisyChannels);
 
             return watch.ElapsedTicks;
         }
@@ -186,6 +188,25 @@ namespace NLMBase
             }
 
             return sum / size;
+        }
+
+        private float SSIM(float[] firstArray, float[] secondArray)
+        {
+            var channelSize = this.height * this.width;
+            var firstSingleArray = new float[channelSize];
+            var secondSingleArray = new float[channelSize];
+
+            for (var i = 0; i < channelSize; ++i)
+            {
+                for (var j = 0; j < this.channels; ++j)
+                {
+                    firstSingleArray[i] = 0.3f * firstArray[i + channelSize + channelSize] + 0.59f * firstArray[i + channelSize] + 0.11f * firstArray[i];
+                    secondSingleArray[i] = 0.3f * secondArray[i + channelSize + channelSize] + 0.59f * secondArray[i + channelSize] + 0.11f * secondArray[i];
+                }
+            }
+
+            var ssim = new SSIM();
+            return ssim.ComputeSSIM(firstSingleArray, secondSingleArray, this.width, this.height);
         }
 
         private float[] UnwrapChannels(byte[] input)

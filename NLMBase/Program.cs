@@ -66,14 +66,16 @@
             var output = (Bitmap)null;
             var mseNoisy = 0.0f;
             var mseOutput = 0.0f;
+            var ssimNoisy = 0.0f;
+            var ssimOutput = 0.0f;
             var input = new Bitmap(inputName);
             var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
 
             var denoiser = new Denoiser(input, library);
-            var ticksElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput);
+            var ticksElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
             Console.WriteLine("Time elapsed: {0}", TimeSpan.FromTicks(ticksElapsed));
-            Console.WriteLine("MSE (vs noisy): {0}", mseNoisy);
-            Console.WriteLine("MSE (vs output): {0}", mseOutput);
+            Console.WriteLine("MSE: {0} -> {1}", mseNoisy, mseOutput);
+            Console.WriteLine("SSIM: {0} -> {1}", ssimNoisy, ssimOutput);
 
             noisy.Save($"noisy-{timeStamp}.png");
             output.Save($"filtered-{timeStamp}.png");

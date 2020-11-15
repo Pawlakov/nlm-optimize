@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace NLMBase
 {
@@ -50,7 +51,7 @@ namespace NLMBase
             // number of denoised values per pixel
             var fpCount = new float[iwxh];
 
-            for (var y = 0; y < iHeight; y++)
+            Parallel.For(0, iHeight, y =>
             {
                 // auxiliary variable
                 // denoised patch centered at a certain pixel
@@ -170,7 +171,7 @@ namespace NLMBase
 
                     }
                 }
-            }
+            });
 
             for (int ii = 0; ii < iwxh; ii++)
             {

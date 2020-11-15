@@ -2,7 +2,7 @@
   "profiles": {
     "NLMBase": {
       "commandName": "Project",
-      "commandLineArgs": "-i osmosis.png -s 100 -l NLMBasic.dll"
+      "commandLineArgs": "-i osmosis.png -s 25"
     }
   }
 }
