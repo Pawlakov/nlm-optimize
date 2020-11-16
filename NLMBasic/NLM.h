@@ -15,7 +15,7 @@
 #define LUTMAXM1 29.0
 #define LUTPRECISION 1000.0
 
-extern "C" __declspec(dllexport) void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight);
+extern void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight);
 
 void  wxFillExpLut(float* lut, int size);        // Fill exp(-x) lut
 

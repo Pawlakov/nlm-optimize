@@ -13,7 +13,8 @@
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
             "args": [
                 "-i", "osmosis.png",
-                "-s", "100"
+                "-s", "100",
+                "-l", "NLMBasic.so"
              ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

@@ -1,9 +1,6 @@
-#pragma once
-
-#include "pch.h"
 #include "NLM.h"
 
-extern "C" __declspec(dllexport) void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
+extern void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
 {
 	// length of each channel
 	int iwxh = iWidth * iHeight;
@@ -39,9 +36,7 @@ extern "C" __declspec(dllexport) void Denoise(int iDWin, int iDBloc, float fSigm
 
 	// PROCESS STARTS
 	// for each pixel (x,y)
-#pragma omp parallel shared(fpI, fpO)
 	{
-#pragma omp for schedule(dynamic) nowait
 		for (int y = 0; y < iHeight; y++)
 		{
 			// auxiliary variable

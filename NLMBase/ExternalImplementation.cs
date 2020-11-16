@@ -11,18 +11,8 @@ namespace NLMBase
 
         private ExternalImplementation(string libraryName)
         {
-            this.libraryHandle = LoadLibrary(libraryName);
-            if (this.libraryHandle == IntPtr.Zero)
-            {
-                throw new Exception(Marshal.GetLastWin32Error().ToString());
-            }
-
-            var functionAddress = GetProcAddress(this.libraryHandle, "Denoise");
-            if (functionAddress == IntPtr.Zero)
-            {
-                throw new Exception(Marshal.GetLastWin32Error().ToString());
-            }
-
+            this.libraryHandle =  NativeLibrary.Load(libraryName);
+            var functionAddress = NativeLibrary.GetExport(this.libraryHandle, "_Z7DenoiseiiffPPfS0_iii");
             this.Denoise = Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(DenoiseFunction)) as DenoiseFunction;
         }
 
@@ -44,17 +34,8 @@ namespace NLMBase
         {
             if (this.libraryHandle != IntPtr.Zero)
             {
-                FreeLibrary(this.libraryHandle);
+                NativeLibrary.Free(this.libraryHandle);
             }
         }
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr LoadLibrary(string libname);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool FreeLibrary(IntPtr hModule);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
     }
 }

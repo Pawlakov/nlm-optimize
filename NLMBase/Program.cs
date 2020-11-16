@@ -39,9 +39,6 @@
             });
 
             await rootCommand.InvokeAsync(args);
-
-            Console.Write("Press any key to continue.");
-            Console.ReadKey();
         }
 
         public void Run(string inputName, int sigma, string libraryName)
