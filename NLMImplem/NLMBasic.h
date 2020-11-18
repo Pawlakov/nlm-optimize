@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include "NLM.h"
 
 #define MAX(i,j) ( (i)<(j) ? (j):(i) )
 #define MIN(i,j) ( (i)<(j) ? (i):(j) )
@@ -14,8 +15,6 @@
 #define LUTMAX 30.0
 #define LUTMAXM1 29.0
 #define LUTPRECISION 1000.0
-
-extern void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight);
 
 void  wxFillExpLut(float* lut, int size);        // Fill exp(-x) lut
 

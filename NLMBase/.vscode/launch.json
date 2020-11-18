@@ -14,7 +14,7 @@
             "args": [
                 "-i", "osmosis.png",
                 "-s", "100",
-                "-l", "NLMBasic.so"
+                //"-l", "NLMBasic.so"
              ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
