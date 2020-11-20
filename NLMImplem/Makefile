@@ -12,7 +12,7 @@ NLMGpgpu.so: NLMGpgpu.o
 	cp NLMGpgpu.so ../NLMBase/bin/Release/netcoreapp3.1
 
 NLMGpgpu.o: NLMGpgpu.cpp NLMGpgpu.h
-	g++ -c -Wall -Werror -fpic -fopenmp NLMGpgpu.cpp
+	g++ -c -Wall -Werror -fpic -fopenmp NLMGpgpu.cpp -l OpenCL
 
 .PHONY: clean
 clean:
