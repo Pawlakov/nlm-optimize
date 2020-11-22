@@ -3,6 +3,7 @@
     using System;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.CommandLine.Parsing;
     using System.Drawing;
     using System.IO;
     using System.Threading.Tasks;
@@ -13,7 +14,11 @@
         {
             var inputOption = new Option<FileInfo>("-i", "Input file")
             {
-                IsRequired = true,
+                IsRequired = false,
+            }.ExistingOnly();
+            var inputDirOption = new Option<DirectoryInfo>("-d", "Input directory")
+            {
+                IsRequired = false,
             }.ExistingOnly();
             var deviationOption = new Option<int>("-s", "Sigma")
             {
@@ -26,22 +31,24 @@
             var rootCommand = new RootCommand ("NLM")
             {
                 inputOption,
+                inputDirOption,
                 deviationOption,
                 libraryOption,
             };
 
             var program = new Program();
-            rootCommand.Handler = CommandHandler.Create<FileInfo, int, FileInfo>((i, s, l) =>
+            rootCommand.Handler = CommandHandler.Create<FileInfo, DirectoryInfo, int, FileInfo>((i, d, s, l) =>
             {
-                var fileName = i.FullName;
+                var directoryName = d?.FullName;
+                var fileName = i?.FullName;
                 var libraryName = l?.FullName;
-                program.Run(fileName, s, libraryName);
+                program.Run(fileName, directoryName, s, libraryName);
             });
 
             await rootCommand.InvokeAsync(args);
         }
 
-        public void Run(string inputName, int sigma, string libraryName)
+        public void Run(string inputName, string directoryName, int sigma, string libraryName)
         {
             var library = (IImplementation)null;
 

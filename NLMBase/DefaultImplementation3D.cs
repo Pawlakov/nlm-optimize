@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace NLMBase
 {
-    public unsafe class DefaultImplementation 
-        : IImplementation
+    public unsafe class DefaultImplementation3D
+        : IImplementation3D
     {
         private const float LUTMAX = 30.0f;
         private const float LUTMAXM1 = 29.0f;
@@ -19,20 +19,20 @@ namespace NLMBase
         // fFiltPar Filtering parameter
         // fpI      Input
         // fpO      Output
-        public DenoiseFunction Denoise => DenoiseBody;
+        public Denoise3DFunction Denoise => DenoiseBody;
 
         public void Dispose()
         {
         }
 
-        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
+        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight, int iDepth)
         {
             // length of each channel
-            var iwxh = iWidth * iHeight;
+            var iwxhxd = iWidth * iHeight * iDepth;
 
             //  length of comparison window
             var ihwl = (2 * iDWin + 1);
-            var iwl = (2 * iDWin + 1) * (2 * iDWin + 1);
+            var iwl = (2 * iDWin + 1) * (2 * iDWin + 1) * (2 * iDWin + 1);
             var icwl = iChannels * iwl;
 
             // filtering parameter
@@ -50,7 +50,7 @@ namespace NLMBase
 
             // auxiliary variable
             // number of denoised values per pixel
-            var fpCount = new float[iwxh];
+            var fpCount = new float[iwxhxd];
 
             Parallel.For(0, iHeight, y =>
             {

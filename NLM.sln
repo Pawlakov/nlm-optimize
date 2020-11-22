@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLMBase", "NLMBase\NLMBase.csproj", "{837DD303-495E-4B6B-AE41-09F744721968}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NLMBasic", "NLMBasic\NLMBasic.vcxproj", "{10F591D6-5A75-4333-857A-97E1B926F948}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,16 +27,6 @@ Global
 		{837DD303-495E-4B6B-AE41-09F744721968}.Release|x64.Build.0 = Release|Any CPU
 		{837DD303-495E-4B6B-AE41-09F744721968}.Release|x86.ActiveCfg = Release|Any CPU
 		{837DD303-495E-4B6B-AE41-09F744721968}.Release|x86.Build.0 = Release|Any CPU
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Debug|x64.ActiveCfg = Debug|x64
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Debug|x64.Build.0 = Debug|x64
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Debug|x86.ActiveCfg = Debug|Win32
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Debug|x86.Build.0 = Debug|Win32
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Release|Any CPU.ActiveCfg = Release|Win32
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Release|x64.ActiveCfg = Release|x64
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Release|x64.Build.0 = Release|x64
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Release|x86.ActiveCfg = Release|Win32
-		{10F591D6-5A75-4333-857A-97E1B926F948}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
