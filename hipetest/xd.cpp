@@ -1,13 +1,14 @@
+#include <iostream>
 #include "hip/hip_runtime.h"
 
-#define HIP_CHECK(command) {        \
-    hipError_t status = command;    \
-    if (status!=hipSuccess) {       \
-        std::cerr << "Error HIP reports " << hipGetErrorString(status) << std::endl;    \
-        std:abort(); } }
+#define HIP_CHECK(command) { \
+    hipError_t status = command; \
+    if (status!=hipSuccess) { \
+        std::cerr << "Error HIP reports " << hipGetErrorString(status) << std::endl; \
+        std::abort(); } }
 
 __global__ void myKernel(int N, double *d_a){
-    int i = threadId.x + blockId.x * blockDim.x;
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
     if (i < N) {
         d_a[i] *= 2.0;
     }
@@ -20,16 +21,20 @@ int main() {
     double *d_a = NULL;
     HIP_CHECK(hipMalloc(&d_a, Nbytes));
 
-    // FILL DATA
+    for (int i = 0; i < N; ++i) {
+        h_a[i] = i;
+    }
 
     HIP_CHECK(hipMemcpy(d_a, h_a, Nbytes, hipMemcpyHostToDevice));
 
-    hipLaunchKernelGGL(myKernel, dim3((N + 256 - 1)/256, 1, 1), dim3(256, 1, 1), 0, 0, N, a);
+    hipLaunchKernelGGL(myKernel, dim3((N + 256 - 1)/256, 1, 1), dim3(256, 1, 1), 0, 0, N, d_a);
     HIP_CHECK(hipGetLastError());
 
     HIP_CHECK(hipMemcpy(h_a, d_a, Nbytes, hipMemcpyDeviceToHost));
 
-    // VIEW DATA
+    for (int i = 0; i < N; ++i) {
+        std::cout << h_a[i] << std::endl;
+    }
 
     free(h_a);
     HIP_CHECK(hipFree(d_a));

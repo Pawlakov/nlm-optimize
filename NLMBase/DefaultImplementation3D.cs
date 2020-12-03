@@ -27,6 +27,7 @@ namespace NLMBase
 
         private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight, int iDepth)
         {
+            /*
             // length of each channel
             var iwxhxd = iWidth * iHeight * iDepth;
 
@@ -191,6 +192,7 @@ namespace NLMBase
                     }
                 }
             }
+            */
         }
 
         private void wxFillExpLut(float[] lut, int size)

@@ -6,15 +6,15 @@ NLMBasic.so: NLMBasic.o
 NLMBasic.o: NLMBasic.cpp NLMBasic.h
 	g++ -c -Wall -Werror -fpic -fopenmp NLMBasic.cpp
 
-NLMGpgpu.so: NLMGpgpu.o
-	g++ -shared -fopenmp -o NLMGpgpu.so NLMGpgpu.o
+NLMGpgpu.so: NLMGpgpu.hip.o
+	hipcc -shared -o NLMGpgpu.so NLMGpgpu.hip.o
 	cp NLMGpgpu.so ../NLMBase
 	cp NLMGpgpu.so ../NLMBase/bin/Release/netcoreapp3.1
 
-NLMGpgpu.o: NLMGpgpu.cpp NLMGpgpu.h
-	g++ -c -Wall -Werror -fpic -fopenmp NLMGpgpu.cpp -l OpenCL
+NLMGpgpu.hip.o: NLMGpgpu.hip.cpp NLMGpgpu.hip.h
+	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu.hip.cpp
 
 .PHONY: clean
 clean:
 	rm -f NLMBasic.o NLMBasic.so
-	rm -f NLMGpgpu.o NLMGpgpu.so
+	rm -f NLMGpgpu.hip.o NLMGpgpu.so
