@@ -1,23 +1,217 @@
 #include "NLMGpgpu.hip.h"
 
-__global__ void turboCopy(float *fpI, float *fpO, int iChannels, int iWidth, int iHeight)
+__global__ void theKernelOfShit(int iDWin, int iDBloc, float fSigma, float fFiltPar, float *fpI, float *fpO, int iChannels, int iWidth, int iHeight)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    if (x < iWidth && y < iHeight)
-    {
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
 
+    // length of each channel
+    int iwxh = iWidth * iHeight;
+
+    if (i < iwxh)
+    {
+        var x = i % iWidth;
+        var y = i / iWidth;
+
+        //  length of comparison window
+        int ihwl = (2 * iDWin + 1);
+        int iwl = (2 * iDWin + 1) * (2 * iDWin + 1);
+        int icwl = iChannels * iwl;
+
+        // filtering parameter
+        float fSigma2 = fSigma * fSigma;
+        float fH = fFiltPar * fSigma;
+        float fH2 = fH * fH;
+
+        // multiply by size of patch, since distances are not normalized
+        fH2 *= (float)icwl;
+
+        // tabulate exp(-x), faster than using directly function expf
+        int iLutLength = (int)rintf((float)LUTMAX * (float)LUTPRECISION);
+        float* fpLut = new float[iLutLength];
+        wxFillExpLut(fpLut, iLutLength);
+
+        // auxiliary variable
+        // number of denoised values per pixel
+        float* fCount = 0.0f;
+
+        // clear output
+        for (int ii = 0; ii < iChannels; ii++)
+        {
+            fpO[i + ii * iwxh] = 0.0f;
+        }
+
+        // auxiliary variable
+        // denoised patch centered at a certain pixel
+        float** fpODenoised = new float* [iChannels];
+        for (int ii = 0; ii < iChannels; ii++)
+        {
+            fpODenoised[ii] = new float[iwl];
+        }
+
+        // początek pętli po kolumnach
+        for (int x = 0; x < iWidth; x++)
+        {
+            // reduce the size of the comparison window if we are near the boundary
+            int iDWin0 = MIN(iDWin, MIN(iWidth - 1 - x, MIN(iHeight - 1 - y, MIN(x, y))));
+
+            // research zone depending on the boundary and the size of the window
+            int imin = MAX(x - iDBloc, iDWin0);
+            int jmin = MAX(y - iDBloc, iDWin0);
+
+            int imax = MIN(x + iDBloc, iWidth - 1 - iDWin0);
+            int jmax = MIN(y + iDBloc, iHeight - 1 - iDWin0);
+
+            //  clear current denoised patch
+            for (int ii = 0; ii < iChannels; ii++) fpClear(fpODenoised[ii], 0.0f, iwl);
+
+            // maximum of weights. Used for reference patch
+            float fMaxWeight = 0.0f;
+
+            // sum of weights
+            float fTotalWeight = 0.0f;
+
+            for (int j = jmin; j <= jmax; j++)
+            {
+                for (int i = imin; i <= imax; i++)
+                {
+                    if (i != x || j != y)
+                    {
+                        float fDif = fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth);
+
+                        // dif^2 - 2 * fSigma^2 * N      dif is not normalized
+                        fDif = MAX(fDif - 2.0f * (float)icwl * fSigma2, 0.0f);
+                        fDif = fDif / fH2;
+
+                        float fWeight = wxSLUT(fDif, fpLut);
+
+                        if (fWeight > fMaxWeight)
+                        {
+                            fMaxWeight = fWeight;
+                        }
+
+                        fTotalWeight += fWeight;
+
+                        for (int is = -iDWin0; is <= iDWin0; is++)
+                        {
+                            int aiindex = (iDWin + is) * ihwl + iDWin;
+                            int ail = (j + is) * iWidth + i;
+
+                            for (int ir = -iDWin0; ir <= iDWin0; ir++)
+                            {
+                                int iindex = aiindex + ir;
+                                int il = ail + ir;
+
+                                for (int ii = 0; ii < iChannels; ii++)
+                                {
+                                    fpODenoised[ii][iindex] += fWeight * fpI[ii][il];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // current patch with fMaxWeight
+            for (int is = -iDWin0; is <= iDWin0; is++)
+            {
+                int aiindex = (iDWin + is) * ihwl + iDWin;
+                int ail = (y + is) * iWidth + x;
+                for (int ir = -iDWin0; ir <= iDWin0; ir++)
+                {
+                    int iindex = aiindex + ir;
+                    int il = ail + ir;
+
+                    for (int ii = 0; ii < iChannels; ii++)
+                    {
+                        fpODenoised[ii][iindex] += fMaxWeight * fpI[ii][il];
+                    }
+                }
+            }
+
+            fTotalWeight += fMaxWeight;
+
+            // normalize average value when fTotalweight is not near zero
+            if (fTotalWeight > fTiny)
+            {
+                for (int is = -iDWin0; is <= iDWin0; is++)
+                {
+                    int aiindex = (iDWin + is) * ihwl + iDWin;
+                    int ail = (y + is) * iWidth + x;
+
+                    for (int ir = -iDWin0; ir <= iDWin0; ir++)
+                    {
+                        int iindex = aiindex + ir;
+                        int il = ail + ir;
+
+                        fpCount[il]++;
+
+                        for (int ii = 0; ii < iChannels; ii++)
+                        {
+                            fpO[ii][il] += fpODenoised[ii][iindex] / fTotalWeight;
+                        }
+                    }
+                }
+            }
+        }
+        // koniec pętli po kolumnach
+
+        for (int ii = 0; ii < iChannels; ii++)
+        {
+            delete[] fpODenoised[ii];
+        }
+        delete[] fpODenoised;
+
+        // koniec pętli po wierszach
+
+        if (fCount > 0.0)
+        {
+            for (int jj = 0; jj < iChannels; jj++)
+            {
+                fpO[jj * iwxh + i] /= fCount;
+            }
+        }
+        else
+        {
+            for (int jj = 0; jj < iChannels; jj++)
+            {
+                fpO[jj * iwxh + i] = fpI[jj * iwxh + i];
+            }
+        }
+
+        // delete memory
+        delete[] fpLut;
     }
 }
 
 extern void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
 {
-    dim3 gpuThreads(16, 16, 1);
-    dim3 gpuBlocks((iWidth + 16 - 1) / 16, (iHeight + 16 - 1) / 16, iChannels);
-
 	// length of each channel
 	int iwxh = iWidth * iHeight;
+
+    dim3 gpuThreads(256, 1, 1);
+    dim3 gpuBlocks((iwxh + 256 - 1) / 256, 1, 1);
+
+    size_t channelBytes = iwxh * sizeof(float);
+    size_t totalBytes = iChannels * channelBytes;
+    float* inputData;
+    float* outputData;
+    HIP_CHECK(hipMalloc(&inputData, totalBytes));
+    HIP_CHECK(hipMalloc(&outputData, totalBytes));
+    for (int = 0; i < iChannels; iChannels++)
+    {
+        HIP_CHECK(hipMemcpy(inputData + i * iwxh, fpI[i], channelBytes, hipMemcpyHostToDevice));
+    }
+
+    hipLaunchKernelGGL(theKernelOfShit, gpuBlocks, gpuThreads, 0, 0, iDWin, iDBloc, fSigma, fFiltPar, inputData, outputData, iChannels, iWidth, iHeight);
+    HIP_CHECK(hipGetLastError());
+
+    for (int = 0; i < iChannels; iChannels++)
+    {
+        HIP_CHECK(hipMemcpy(fpO[i], outputData + i * iwxh, channelBytes, hipMemcpyDeviceToHost));
+    }
+
+    HIP_CHECK(hipFree(inputData));
+    HIP_CHECK(hipFree(outputData));
 
 	//  length of comparison window
 	int ihwl = (2 * iDWin + 1);
