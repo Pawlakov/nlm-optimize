@@ -62,7 +62,10 @@ extern void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float**
 				int jmax = MIN(y + iDBloc, iHeight - 1 - iDWin0);
 
 				//  clear current denoised patch
-				for (int ii = 0; ii < iChannels; ii++) fpClear(fpODenoised[ii], 0.0f, iwl);
+				for (int ii = 0; ii < iChannels; ii++) 
+				{
+					fpClear(fpODenoised[ii], 0.0f, iwl);
+				}
 
 				// maximum of weights. Used for reference patch
 				float fMaxWeight = 0.0f;

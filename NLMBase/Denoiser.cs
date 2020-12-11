@@ -58,18 +58,20 @@ namespace NLMBase
             watch.Stop();
 
             noisy = new Bitmap(this.width, this.height, pixelFormat);
-            var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
-            var noisyOrigin = noisyData.Scan0;
+            //var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
+            //var noisyOrigin = noisyData.Scan0;
             var noisyArray = WrapChannels(noisyChannels);
-            Marshal.Copy(noisyArray, 0, noisyOrigin, this.length);
-            noisy.UnlockBits(noisyData);
+            //Marshal.Copy(noisyArray, 0, noisyOrigin, this.length);
+            //noisy.UnlockBits(noisyData);
+            this.WriteBitemapTheDumbWay(noisy, noisyArray);
 
             result = new Bitmap(this.width, this.height, pixelFormat);
-            var resultData = result.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
-            var resultOrigin = resultData.Scan0;
+            //var resultData = result.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
+            //var resultOrigin = resultData.Scan0;
             var resultArray = WrapChannels(resultChannels);
-            Marshal.Copy(resultArray, 0, resultOrigin, this.length);
-            result.UnlockBits(resultData);
+            //Marshal.Copy(resultArray, 0, resultOrigin, this.length);
+            //result.UnlockBits(resultData);
+            this.WriteBitemapTheDumbWay(result, resultArray);
 
             mseResult = this.MSE(this.inputChannels, resultChannels);
             mseNoisy = this.MSE(this.inputChannels, noisyChannels);
@@ -249,6 +251,31 @@ namespace NLMBase
             var resultChannels = new float[this.channels * this.width * this.height];
 
             return resultChannels;
+        }
+
+        private void WriteBitemapTheDumbWay(Bitmap bitmap, byte[] bytesWrapped)
+        {
+            for (var x = 0; x < this.width; ++x)
+            {
+                for (var y = 0; y < this.height; ++y)
+                {
+                    switch (this.channels)
+                    {
+                        case 1:
+                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[y * this.stride + x * 1 + 0], bytesWrapped[y * this.stride + x * 1 + 0], bytesWrapped[y * this.stride + x] * 1 + 0));
+                            break;
+                        case 2:
+                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[y * this.stride + x * 2 + 1], bytesWrapped[y * this.stride + x * 2 + 0], bytesWrapped[y * this.stride + x * 2 + 0], bytesWrapped[y * this.stride + x * 2 + 0]));
+                            break;
+                        case 3:
+                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[y * this.stride + x * 3 + 2], bytesWrapped[y * this.stride + x * 3 + 1], bytesWrapped[y * this.stride + x * 3 + 0]));
+                            break;
+                        case 4:
+                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[y * this.stride + x * 4 + 3], bytesWrapped[y * this.stride + x * 4 + 2], bytesWrapped[y * this.stride + x * 4 + 1], bytesWrapped[y * this.stride + x * 4 + 0]));
+                            break;
+                    }
+                }
+            }
         }
     }
 }
