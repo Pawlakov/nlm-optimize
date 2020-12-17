@@ -14,14 +14,6 @@ NLMGpgpu.so: NLMGpgpu.hip.o
 NLMGpgpu.hip.o: NLMGpgpu.hip.cpp NLMGpgpu.hip.h
 	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu.hip.cpp
 
-NLMGpgpu2.so: NLMGpgpu2.hip.o
-	hipcc -shared -o NLMGpgpu2.so NLMGpgpu2.hip.o
-	cp NLMGpgpu2.so ../NLMBase
-	cp NLMGpgpu2.so ../NLMBase/bin/Release/netcoreapp3.1
-
-NLMGpgpu2.hip.o: NLMGpgpu2.hip.cpp NLMGpgpu2.hip.h
-	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu2.hip.cpp
-
 .PHONY: clean
 clean:
 	rm -f NLMBasic.o NLMBasic.so
