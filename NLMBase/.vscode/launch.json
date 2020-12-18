@@ -13,7 +13,7 @@
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
             "args": [
                 "-i", "osmosis.jpg",
-                "-s", "20",
+                "-s", "100",
                 "-l", "NLMGpgpu.so"
              ],
             "cwd": "${workspaceFolder}",
