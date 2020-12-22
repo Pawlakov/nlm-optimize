@@ -136,9 +136,23 @@ __global__ void filterKernel(int windowRadius, int blockRadius, float sigma, flo
 	}
 }
 
-void filter(int windowRadius, int blockRadius, float sigma, float fFiltPar, float** input, float** output, int channels, int width, int height)
+extern void Denoise(int windowRadius, int blockRadius, float sigma, float fFiltPar, float** input, float** output, int channels, int width, int height)
 {
+	int windowLength1D = 2 * windowRadius + 1;
+	int windowLength2D = windowLength1D * windowLength1D;
+	int windowLength3D = channels * windowLength2D;
+
+	int blockLength1D = 2 * blockRadius + 1;
+	int blockLength2D = blockLength1D * blockLength1D;
+	int blockLength3D = channels * blockLength2D;
+
+	std::cout << "Window: " << windowLength3D << std::endl;
+	std::cout << "Block: " << blockLength3D << std::endl;
+
 	int channelLength = width * height;
+
+	hipStream_t stream;
+	hipStreamCreate(&stream);
 
 	dim3 gpuThreads(256, 1, 1);
     dim3 gpuBlocks((channelLength + 256 - 1) / 256, 1, 1);
@@ -152,10 +166,10 @@ void filter(int windowRadius, int blockRadius, float sigma, float fFiltPar, floa
 	HIP_CHECK(hipMalloc(&totalWeightsDevice, channelBytes));
     for (int i = 0; i < channels; i++)
     {
-        HIP_CHECK(hipMemcpy(inputDevice + i * channelLength, input[i], channelBytes, hipMemcpyHostToDevice));
+        HIP_CHECK(hipMemcpyAsync(inputDevice + i * channelLength, input[i], channelBytes, hipMemcpyHostToDevice, stream));
     }
 
-    hipLaunchKernelGGL(getGlobalWeightsKernel, gpuBlocks, gpuThreads, 0, 0, totalWeightsDevice, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, channels, width, height);
+    hipLaunchKernelGGL(getGlobalWeightsKernel, gpuBlocks, gpuThreads, 0, stream, totalWeightsDevice, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, channels, width, height);
     HIP_CHECK(hipGetLastError());
 
 	//
@@ -163,20 +177,17 @@ void filter(int windowRadius, int blockRadius, float sigma, float fFiltPar, floa
 	float* outputDevice;
 	HIP_CHECK(hipMalloc(&outputDevice, totalBytes));
 
-    hipLaunchKernelGGL(filterKernel, gpuBlocks, gpuThreads, 0, 0, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, outputDevice, channels, width, height, totalWeightsDevice);
+    hipLaunchKernelGGL(filterKernel, gpuBlocks, gpuThreads, 0, stream, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, outputDevice, channels, width, height, totalWeightsDevice);
     HIP_CHECK(hipGetLastError());
 
 	for (int i = 0; i < channels; i++)
     {
-        HIP_CHECK(hipMemcpy(output[i], outputDevice + i * channelLength, channelBytes, hipMemcpyDeviceToHost));
+        HIP_CHECK(hipMemcpyAsync(output[i], outputDevice + i * channelLength, channelBytes, hipMemcpyDeviceToHost, stream));
     }
 
     HIP_CHECK(hipFree(inputDevice));
 	HIP_CHECK(hipFree(outputDevice));
 	HIP_CHECK(hipFree(totalWeightsDevice));
-}
 
-extern void Denoise(int windowRadius, int blockRadius, float sigma, float fFiltPar, float** input, float** output, int channels, int width, int height)
-{
-	filter(windowRadius, blockRadius, sigma, fFiltPar, input, output, channels, width, height);
+	hipStreamDestroy(stream);
 }
