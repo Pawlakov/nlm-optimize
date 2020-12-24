@@ -6,16 +6,24 @@ NLMBasic.so: NLMBasic.o
 NLMBasic.o: NLMBasic.cpp NLMBasic.h
 	g++ -c -Wall -Werror -fpic -fopenmp NLMBasic.cpp
 
-NLMGpgpu.so: NLMGpgpu.hip.o
-	hipcc -shared -o NLMGpgpu.so NLMGpgpu.hip.o
-	cp NLMGpgpu.so ../NLMBase
-	cp NLMGpgpu.so ../NLMBase/bin/Release/netcoreapp3.1
+NLMGpgpu0.so: NLMGpgpu0.hip.o
+	hipcc -shared -o NLMGpgpu0.so NLMGpgpu0.hip.o
+	cp NLMGpgpu0.so ../NLMBase
+	cp NLMGpgpu0.so ../NLMBase/bin/Release/netcoreapp3.1
 
-NLMGpgpu.hip.o: NLMGpgpu.hip.cpp NLMGpgpu.hip.h
-	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu.hip.cpp
+NLMGpgpu0.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
+	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu0.hip.cpp
+
+NLMGpgpu1.so: NLMGpgpu1.hip.o
+	hipcc -shared -o NLMGpgpu1.so NLMGpgpu1.hip.o
+	cp NLMGpgpu1.so ../NLMBase
+	cp NLMGpgpu1.so ../NLMBase/bin/Release/netcoreapp3.1
+
+NLMGpgpu1.hip.o: NLMGpgpu1.hip.cpp NLMGpgpu1.hip.h
+	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu1.hip.cpp
 
 .PHONY: clean
 clean:
 	rm -f NLMBasic.o NLMBasic.so
-	rm -f NLMGpgpu.hip.o NLMGpgpu.so
-	rm -f NLMGpgpu2.hip.o NLMGpgpu2.so
+	rm -f NLMGpgpu0.hip.o NLMGpgpu0.so
+	rm -f NLMGpgpu1.hip.o NLMGpgpu1.so

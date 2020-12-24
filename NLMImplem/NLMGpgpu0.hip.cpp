@@ -1,4 +1,4 @@
-#include "NLMGpgpu.hip.h"
+#include "NLMGpgpu0.hip.h"
 
 __device__ float fiL2FloatDist(float* input, int x0, int y0, int x1, int y1, int windowRadius, int channels, int width, int channelLength)
 {
@@ -138,17 +138,6 @@ __global__ void filterKernel(int windowRadius, int blockRadius, float sigma, flo
 
 extern void Denoise(int windowRadius, int blockRadius, float sigma, float fFiltPar, float** input, float** output, int channels, int width, int height)
 {
-	int windowLength1D = 2 * windowRadius + 1;
-	int windowLength2D = windowLength1D * windowLength1D;
-	int windowLength3D = channels * windowLength2D;
-
-	int blockLength1D = 2 * blockRadius + 1;
-	int blockLength2D = blockLength1D * blockLength1D;
-	int blockLength3D = channels * blockLength2D;
-
-	std::cout << "Window: " << windowLength3D << std::endl;
-	std::cout << "Block: " << blockLength3D << std::endl;
-
 	int channelLength = width * height;
 
 	hipStream_t stream;

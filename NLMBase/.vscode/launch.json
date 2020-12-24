@@ -12,9 +12,9 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
             "args": [
-                "-i", "wallpaper.jpg",
-                "-s", "100",
-                "-l", "NLMGpgpu.so"
+                "-i", "osmosis.jpg",
+                "-s", "20",
+                "-l", "NLMGpgpu1.so"
              ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
