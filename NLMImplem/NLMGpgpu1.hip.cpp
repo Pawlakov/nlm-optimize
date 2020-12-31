@@ -70,6 +70,54 @@ __global__ void getWeightsKernel(float* weights, int windowRadius, int blockRadi
 	}
 }
 
+__global__ void getWeightsKernelAlt(float* weights, int windowRadius, int blockRadius, float sigma, float filteringParam, float* input, int channels, int width, int height)
+{
+	int channelLength = width * height;
+
+	int blockLength1D = 2 * blockRadius + 1;
+	int blockLength2D = blockLength1D * blockLength1D;
+
+	int xy = threadIdx.x + blockIdx.x * blockDim.x;
+	int blockXYRelative = threadIdx.y + blockIdx.y * blockDim.y;
+
+	if (xy < channelLength && blockXYRelative < blockLength2D)
+	{
+		int x = xy % width;
+		int y = xy / width;
+		int blockXRelative = blockXYRelative % blockLength1D;
+		int blockYRelative = blockXYRelative / blockLength1D;
+
+		int windowRadiusReduced = MIN(windowRadius, MIN(width - 1 - x, MIN(height - 1 - y, MIN(x, y))));
+
+		int blockXMin = MAX(x - blockRadius, windowRadiusReduced);
+		int blockYMin = MAX(y - blockRadius, windowRadiusReduced);
+
+		int blockXMax = MIN(x + blockRadius, width - 1 - windowRadiusReduced);
+		int blockYMax = MIN(y + blockRadius, height - 1 - windowRadiusReduced);
+
+		int blockX = x + blockXRelative - blockRadius;
+		int blockY = y + blockYRelative - blockRadius;
+
+		if (blockX >= blockXMin && blockX <= blockXMax && blockY >= blockYMin && blockY <= blockYMax)
+		{
+			int windowLength1D = 2 * windowRadius + 1;
+			int windowLength2D = windowLength1D * windowLength1D;
+			int windowLength3D = channels * windowLength2D;
+
+			weights[xy * blockLength2D + blockXYRelative] = 0.0f;
+
+			float difference = fiL2FloatDist(input, x, y, blockX, blockY, windowRadiusReduced, channels, width, channelLength);
+
+			difference = MAX(difference - 2.0f * windowLength3D * sigma * sigma, 0.0f);
+			difference = difference / (filteringParam * filteringParam * sigma * sigma * windowLength3D);
+
+			float weight = expf(-difference);
+
+			weights[xy * blockLength2D + blockXYRelative] = weight;
+		}
+	}
+}
+
 __global__ void filterKernel(int windowRadius, int blockRadius, float sigma, float filteringParam, float* input, float* output, int channels, int width, int height, float* weights)
 {
 	int outputXY = threadIdx.x + blockIdx.x * blockDim.x;
@@ -168,8 +216,11 @@ extern void Denoise(int windowRadius, int blockRadius, float sigma, float fFiltP
 	hipStream_t stream;
 	hipStreamCreate(&stream);
 
-	dim3 gpuThreads(256, 1, 1);
-    dim3 gpuBlocks((channelLength + 256 - 1) / 256, 1, 1);
+	dim3 gpuWeightsThreads(32, 8, 1);
+    dim3 gpuWeightsBlocks((channelLength + 32 - 1) / 32, (blockLength2D + 8 - 1) / 8, 1);
+
+	dim3 gpuFilterThreads(256, 1, 1);
+    dim3 gpuFilterBlocks((channelLength + 256 - 1) / 256, 1, 1);
 
 	size_t channelBytes = channelLength * sizeof(float);
 
@@ -184,10 +235,10 @@ extern void Denoise(int windowRadius, int blockRadius, float sigma, float fFiltP
         HIP_CHECK(hipMemcpyAsync(inputDevice + i * channelLength, input[i], channelBytes, hipMemcpyHostToDevice, stream));
     }
 
-    hipLaunchKernelGGL(getWeightsKernel, gpuBlocks, gpuThreads, 0, stream, weightsDevice, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, channels, width, height);
+    hipLaunchKernelGGL(getWeightsKernelAlt, gpuWeightsBlocks, gpuWeightsThreads, 0, stream, weightsDevice, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, channels, width, height);
     HIP_CHECK(hipGetLastError());
 
-    hipLaunchKernelGGL(filterKernel, gpuBlocks, gpuThreads, 0, stream, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, outputDevice, channels, width, height, weightsDevice);
+    hipLaunchKernelGGL(filterKernel, gpuFilterBlocks, gpuFilterThreads, 0, stream, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, outputDevice, channels, width, height, weightsDevice);
     HIP_CHECK(hipGetLastError());
 
 	for (int i = 0; i < channels; i++)

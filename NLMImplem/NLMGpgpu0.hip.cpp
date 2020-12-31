@@ -26,34 +26,37 @@ __global__ void getGlobalWeightsKernel(float* totalWeights, int windowRadius, in
 	int x = xy % width;
 	int y = xy / width;
 
-	int channelLength = width * height;
-
-	int windowLength1D = 2 * windowRadius + 1;
-	int windowLength2D = windowLength1D * windowLength1D;
-	int windowLength3D = channels * windowLength2D;
-
-	int windowRadiusReduced = MIN(windowRadius, MIN(width - 1 - x, MIN(height - 1 - y, MIN(x, y))));
-
-	int blockXMin = MAX(x - blockRadius, windowRadiusReduced);
-	int blockYMin = MAX(y - blockRadius, windowRadiusReduced);
-
-	int blockXMax = MIN(x + blockRadius, width - 1 - windowRadiusReduced);
-	int blockYMax = MIN(y + blockRadius, height - 1 - windowRadiusReduced);
-
-	totalWeights[xy] = 0.0f;
-
-	for (int blockY = blockYMin; blockY <= blockYMax; blockY++)
+	if (x < width && y < height)
 	{
-		for (int blockX = blockXMin; blockX <= blockXMax; blockX++)
+		int channelLength = width * height;
+
+		int windowLength1D = 2 * windowRadius + 1;
+		int windowLength2D = windowLength1D * windowLength1D;
+		int windowLength3D = channels * windowLength2D;
+
+		int windowRadiusReduced = MIN(windowRadius, MIN(width - 1 - x, MIN(height - 1 - y, MIN(x, y))));
+
+		int blockXMin = MAX(x - blockRadius, windowRadiusReduced);
+		int blockYMin = MAX(y - blockRadius, windowRadiusReduced);
+
+		int blockXMax = MIN(x + blockRadius, width - 1 - windowRadiusReduced);
+		int blockYMax = MIN(y + blockRadius, height - 1 - windowRadiusReduced);
+
+		totalWeights[xy] = 0.0f;
+
+		for (int blockY = blockYMin; blockY <= blockYMax; blockY++)
 		{
-			float difference = fiL2FloatDist(input, x, y, blockX, blockY, windowRadiusReduced, channels, width, channelLength);
+			for (int blockX = blockXMin; blockX <= blockXMax; blockX++)
+			{
+				float difference = fiL2FloatDist(input, x, y, blockX, blockY, windowRadiusReduced, channels, width, channelLength);
 
-			difference = MAX(difference - 2.0f * windowLength3D * sigma * sigma, 0.0f);
-			difference = difference / (filteringParam * filteringParam * sigma * sigma * windowLength3D);
+				difference = MAX(difference - 2.0f * windowLength3D * sigma * sigma, 0.0f);
+				difference = difference / (filteringParam * filteringParam * sigma * sigma * windowLength3D);
 
-			float weight = expf(-difference);
+				float weight = expf(-difference);
 
-			totalWeights[xy] += weight;
+				totalWeights[xy] += weight;
+			}
 		}
 	}
 }
