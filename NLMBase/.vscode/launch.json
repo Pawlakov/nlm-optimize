@@ -12,7 +12,7 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
             "args": [
-                "-i", "aronia.jpg",
+                "-i", "osmosis.jpg",
                 "-s", "20",
                 "-l", "NLMGpgpu1.so"
              ],

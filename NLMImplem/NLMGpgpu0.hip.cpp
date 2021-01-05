@@ -64,77 +64,81 @@ __global__ void getGlobalWeightsKernel(float* totalWeights, int windowRadius, in
 __global__ void filterKernel(int windowRadius, int blockRadius, float sigma, float filteringParam, float* input, float* output, int channels, int width, int height, float* totalWeights)
 {
 	int outputXY = threadIdx.x + blockIdx.x * blockDim.x;
-	int count = 0;
 
-	int channelLength = width * height;
-
-	int windowLength1D = 2 * windowRadius + 1;
-	int windowLength2D = windowLength1D * windowLength1D;
-	int windowLength3D = channels * windowLength2D;
-
-	for (int z = 0; z < channels; z++)
+	if (outputXY < width * height)
 	{
-		output[z * channelLength + outputXY] = 0.0f;
-	}
+		int count = 0;
 
-	for (int windowYOffset = -windowRadius; windowYOffset <= windowRadius; windowYOffset++)
-	{
-		for (int windowXOffset = -windowRadius; windowXOffset <= windowRadius; windowXOffset++)
+		int channelLength = width * height;
+
+		int windowLength1D = 2 * windowRadius + 1;
+		int windowLength2D = windowLength1D * windowLength1D;
+		int windowLength3D = channels * windowLength2D;
+
+		for (int z = 0; z < channels; z++)
 		{
-			int inputXY = outputXY - windowXOffset - (windowYOffset * width);
-			int inputX = inputXY % width;
-			int inputY = inputXY / width;
+			output[z * channelLength + outputXY] = 0.0f;
+		}
 
-			int windowRadiusReduced = MIN(windowRadius, MIN(width - 1 - inputX, MIN(height - 1 - inputY, MIN(inputX, inputY))));
-
-			if (inputXY > 0 && inputXY < channelLength && totalWeights[inputXY] > fTiny && abs(windowYOffset) <= windowRadiusReduced && abs(windowXOffset) <= windowRadiusReduced)
+		for (int windowYOffset = -windowRadius; windowYOffset <= windowRadius; windowYOffset++)
+		{
+			for (int windowXOffset = -windowRadius; windowXOffset <= windowRadius; windowXOffset++)
 			{
-				int blockXMin = MAX(inputX - blockRadius, windowRadiusReduced);
-				int blockJMin = MAX(inputY - blockRadius, windowRadiusReduced);
+				int inputXY = outputXY - windowXOffset - (windowYOffset * width);
+				int inputX = inputXY % width;
+				int inputY = inputXY / width;
 
-				int blockXMax = MIN(inputX + blockRadius, width - 1 - windowRadiusReduced);
-				int blockYMax = MIN(inputY + blockRadius, height - 1 - windowRadiusReduced);
+				int windowRadiusReduced = MIN(windowRadius, MIN(width - 1 - inputX, MIN(height - 1 - inputY, MIN(inputX, inputY))));
 
-				for (int blockY = blockJMin; blockY <= blockYMax; blockY++)
+				if (inputXY > 0 && inputXY < channelLength && totalWeights[inputXY] > fTiny && abs(windowYOffset) <= windowRadiusReduced && abs(windowXOffset) <= windowRadiusReduced)
 				{
-					for (int blockX = blockXMin; blockX <= blockXMax; blockX++)
+					int blockXMin = MAX(inputX - blockRadius, windowRadiusReduced);
+					int blockJMin = MAX(inputY - blockRadius, windowRadiusReduced);
+
+					int blockXMax = MIN(inputX + blockRadius, width - 1 - windowRadiusReduced);
+					int blockYMax = MIN(inputY + blockRadius, height - 1 - windowRadiusReduced);
+
+					for (int blockY = blockJMin; blockY <= blockYMax; blockY++)
 					{
-						float difference = fiL2FloatDist(input, inputX, inputY, blockX, blockY, windowRadiusReduced, channels, width, channelLength);
-
-						difference = MAX(difference - 2.0f * (float)windowLength3D * sigma * sigma, 0.0f);
-						difference = difference / (filteringParam * sigma * filteringParam * sigma * windowLength3D);
-
-						float weight = expf(-difference);
-
-						int inputValueXY = (blockY + windowYOffset) * width + blockX + windowXOffset;
-
-						if (blockX == inputX && blockY == inputY)
+						for (int blockX = blockXMin; blockX <= blockXMax; blockX++)
 						{
-							count++;
-						}
+							float difference = fiL2FloatDist(input, inputX, inputY, blockX, blockY, windowRadiusReduced, channels, width, channelLength);
 
-						for (int z = 0; z < channels; z++)
-						{
-							output[z * channelLength + outputXY] += (weight * input[z * channelLength + inputValueXY] / totalWeights[inputXY]);
+							difference = MAX(difference - 2.0f * (float)windowLength3D * sigma * sigma, 0.0f);
+							difference = difference / (filteringParam * sigma * filteringParam * sigma * windowLength3D);
+
+							float weight = expf(-difference);
+
+							int inputValueXY = (blockY + windowYOffset) * width + blockX + windowXOffset;
+
+							if (blockX == inputX && blockY == inputY)
+							{
+								count++;
+							}
+
+							for (int z = 0; z < channels; z++)
+							{
+								output[z * channelLength + outputXY] += (weight * input[z * channelLength + inputValueXY] / totalWeights[inputXY]);
+							}
 						}
 					}
 				}
 			}
 		}
-	}
 
-	if (count > 0)
-	{
-		for (int z = 0; z < channels; z++)
+		if (count > 0)
 		{
-			output[z * channelLength + outputXY] /= count;
+			for (int z = 0; z < channels; z++)
+			{
+				output[z * channelLength + outputXY] /= count;
+			}
 		}
-	}
-	else
-	{
-		for (int z = 0; z < channels; z++)
+		else
 		{
-			output[z * channelLength + outputXY] = input[z * channelLength + outputXY];
+			for (int z = 0; z < channels; z++)
+			{
+				output[z * channelLength + outputXY] = input[z * channelLength + outputXY];
+			}
 		}
 	}
 }

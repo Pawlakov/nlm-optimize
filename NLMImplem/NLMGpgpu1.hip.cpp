@@ -48,13 +48,13 @@ __global__ void getWeightsKernel(float* weights, int windowRadius, int blockRadi
 		int blockX = x + blockXRelative - blockRadius;
 		int blockY = y + blockYRelative - blockRadius;
 
+		weights[blockXYRelative * channelLength + xy] = 0.0f;
+
 		if (blockX >= blockXMin && blockX <= blockXMax && blockY >= blockYMin && blockY <= blockYMax)
 		{
 			int windowLength1D = 2 * windowRadius + 1;
 			int windowLength2D = windowLength1D * windowLength1D;
 			int windowLength3D = channels * windowLength2D;
-
-			weights[blockXYRelative * channelLength + xy] = 0.0f;
 
 			float difference = fiL2FloatDist(input, x, y, blockX, blockY, windowRadiusReduced, channels, width, channelLength);
 
@@ -115,39 +115,35 @@ __global__ void filterKernel(int windowRadius, int blockRadius, float* input, fl
 
 				int windowRadiusReduced = MIN(windowRadius, MIN(width - 1 - inputX, MIN(height - 1 - inputY, MIN(inputX, inputY))));
 
-				if (inputXY > 0 && inputXY < channelLength)
+				if (inputXY > 0 && inputXY < channelLength && abs(windowYOffset) <= windowRadiusReduced && abs(windowXOffset) <= windowRadiusReduced)
 				{
 					float totalWeight = totalWeights[inputXY];
+					float totalWeightInverse = 1 / totalWeight;
 
-					if (totalWeight > fTiny && abs(windowYOffset) <= windowRadiusReduced && abs(windowXOffset) <= windowRadiusReduced)
+					if (totalWeight > fTiny)
 					{
-						int blockXMin = MAX(inputX - blockRadius, windowRadiusReduced);
-						int blockJMin = MAX(inputY - blockRadius, windowRadiusReduced);
-
-						int blockXMax = MIN(inputX + blockRadius, width - 1 - windowRadiusReduced);
-						int blockYMax = MIN(inputY + blockRadius, height - 1 - windowRadiusReduced);
-
-						for (int blockY = blockJMin; blockY <= blockYMax; blockY++)
+						for (int blockYRelative = 0; blockYRelative < blockLength1D; blockYRelative++)
 						{
-							int blockYRelative = blockY - inputY + blockRadius;
-							for (int blockX = blockXMin; blockX <= blockXMax; blockX++)
+							for (int blockXRelative = 0; blockXRelative < blockLength1D; blockXRelative++)
 							{
-								int blockXRelative = blockX - inputX + blockRadius;
-								int blockXYRelative = blockYRelative * blockLength1D + blockXRelative;
-
-								float weight = weights[blockXYRelative * channelLength + inputXY];
-
-								int inputValueXY = (blockY + windowYOffset) * width + blockX + windowXOffset;
-
-								if (blockX == inputX && blockY == inputY)
+								int blockY = inputY + blockYRelative - blockRadius;
+								int blockX = inputX + blockXRelative - blockRadius;
+								if (blockY >= windowRadiusReduced && blockY <= height - 1 - windowRadiusReduced && blockX >= windowRadiusReduced && blockX <= width - 1 - windowRadiusReduced)
 								{
-									count++;
-								}
+									if (blockXRelative == blockRadius && blockYRelative == blockRadius)
+									{
+										count++;
+									}
 
-								for (int z = 0; z < channels; z++)
-								{
-									float inputValue = input[z * channelLength + inputValueXY];
-									output[z * channelLength + outputXY] += (weight * inputValue / totalWeight);
+									int blockXYRelative = blockYRelative * blockLength1D + blockXRelative;
+
+									float weight = weights[blockXYRelative * channelLength + inputXY] * totalWeightInverse;
+									int inputValueXY = (blockY + windowYOffset) * width + blockX + windowXOffset;
+
+									for (int z = 0; z < channels; z++)
+									{
+										output[z * channelLength + outputXY] += (weight * input[z * channelLength + inputValueXY]);
+									}
 								}
 							}
 						}
