@@ -20,7 +20,7 @@ namespace NLMBase
 
         private readonly int channels;
 
-        private readonly float[] inputChannels;
+        private readonly byte[] inputArray;
 
         private readonly PixelFormat pixelFormat;
 
@@ -39,17 +39,18 @@ namespace NLMBase
             this.channels = Image.GetPixelFormatSize(this.pixelFormat) / 8;
             var inputOrigin = inputData.Scan0;
             this.length = Math.Abs(inputData.Stride) * inputData.Height;
-            var inputArray = new byte[this.length];
+            this.inputArray = new byte[this.length];
             Marshal.Copy(inputOrigin, inputArray, 0, this.length);
             input.UnlockBits(inputData);
-            this.inputChannels = UnwrapChannels(inputArray);
             this.library = library;
         }
 
         public long Work(int sigma, out Bitmap noisy, out Bitmap result, out float mseNoisy, out float mseResult, out float ssimNoisy, out float ssimResult)
         {
+            var inputChannels = UnwrapChannels(this.inputArray);
+
             var noisyChannels = MakeEmptyChannels();
-            this.Noise(this.inputChannels, noisyChannels, sigma);
+            this.Noise(inputChannels, noisyChannels, sigma);
 
             var resultChannels = MakeEmptyChannels();
 
@@ -73,10 +74,10 @@ namespace NLMBase
             //result.UnlockBits(resultData);
             this.WriteBitemapTheDumbWay(result, resultArray);
 
-            mseResult = this.MSE(this.inputChannels, resultChannels);
-            mseNoisy = this.MSE(this.inputChannels, noisyChannels);
-            ssimResult = this.SSIM(this.inputChannels, resultChannels);
-            ssimNoisy = this.SSIM(this.inputChannels, noisyChannels);
+            mseResult = this.MSE(this.inputArray, resultArray);
+            mseNoisy = this.MSE(this.inputArray, noisyArray);
+            ssimResult = this.SSIM(this.inputArray, resultArray);
+            ssimNoisy = this.SSIM(this.inputArray, noisyArray);
 
             return watch.ElapsedTicks;
         }
@@ -179,20 +180,20 @@ namespace NLMBase
             }
         }
 
-        private float MSE(float[] firstArray, float[] secondArray)
+        private float MSE(byte[] firstArray, byte[] secondArray)
         {
             var size = this.width * this.height * this.channels;
             var sum = 0.0f;
             for (var i = 0; i < size; ++i)
             {
-                var distance = (firstArray[i] - secondArray[i]) / 255;
+                var distance = (firstArray[i] - secondArray[i]) / 255.0f;
                 sum += (distance * distance);
             }
 
             return sum / size;
         }
 
-        private float SSIM(float[] firstArray, float[] secondArray)
+        private float SSIM(byte[] firstArray, byte[] secondArray)
         {
             var channelSize = this.height * this.width;
             var firstSingleArray = new float[channelSize];
