@@ -10,6 +10,18 @@ NLMBasic.so: NLMBasic.o
 NLMBasic.o: NLMBasic.cpp NLMBasic.h
 	g++ -c -Wall -Werror -fpic -fopenmp NLMBasic.cpp
 
+.PHONY: NLMPlain
+NLMPlain: NLMPlain.so
+	cp NLMPlain.so ../NLMBase
+	cp NLMPlain.so ../NLMBase/bin/Release/netcoreapp3.1
+	rm -f NLMPlain.o NLMPlain.so
+
+NLMPlain.so: NLMPlain.o
+	g++ -shared -fopenmp -o NLMPlain.so NLMPlain.o
+
+NLMPlain.o: NLMPlain.cpp NLMPlain.h
+	g++ -c -Wall -Werror -fpic -fopenmp NLMPlain.cpp
+
 .PHONY: NLMGpgpu0
 NLMGpgpu0: NLMGpgpu0.so
 	cp NLMGpgpu0.so ../NLMBase

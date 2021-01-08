@@ -54,9 +54,11 @@ namespace NLMBase
 
             var resultChannels = MakeEmptyChannels();
 
+            Console.WriteLine("Timer START");
             var watch = Stopwatch.StartNew();
             this.Denoise(noisyChannels, resultChannels, sigma);
             watch.Stop();
+            Console.WriteLine("Timer STOP");
 
             noisy = new Bitmap(this.width, this.height, pixelFormat);
             //var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
@@ -79,7 +81,7 @@ namespace NLMBase
             ssimResult = this.SSIM(this.inputArray, resultArray);
             ssimNoisy = this.SSIM(this.inputArray, noisyArray);
 
-            return watch.ElapsedTicks;
+            return watch.ElapsedMilliseconds;
         }
 
         private void Noise(float[] inputPointer, float[] outputPointer, int sigma)

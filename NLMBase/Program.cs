@@ -76,8 +76,9 @@
             var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
 
             var denoiser = new Denoiser(input, library);
-            var ticksElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
-            Console.WriteLine("Time elapsed: {0}", TimeSpan.FromTicks(ticksElapsed));
+            var millisecondsElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
+            var time = TimeSpan.FromMilliseconds(millisecondsElapsed);
+            Console.WriteLine("Time elapsed: {0}", time);
             Console.WriteLine("MSE: {0} -> {1}", mseNoisy, mseOutput);
             Console.WriteLine("SSIM: {0} -> {1}", ssimNoisy, ssimOutput);
 
