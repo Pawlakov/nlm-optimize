@@ -14,11 +14,7 @@
         {
             var inputOption = new Option<FileInfo>("-i", "Input file")
             {
-                IsRequired = false,
-            }.ExistingOnly();
-            var inputDirOption = new Option<DirectoryInfo>("-d", "Input directory")
-            {
-                IsRequired = false,
+                IsRequired = true,
             }.ExistingOnly();
             var deviationOption = new Option<int>("-s", "Sigma")
             {
@@ -31,39 +27,36 @@
             var rootCommand = new RootCommand ("NLM")
             {
                 inputOption,
-                inputDirOption,
                 deviationOption,
                 libraryOption,
             };
 
             var program = new Program();
-            rootCommand.Handler = CommandHandler.Create<FileInfo, DirectoryInfo, int, FileInfo>((i, d, s, l) =>
-            {
-                var directoryName = d?.FullName;
-                var fileName = i?.FullName;
-                var libraryName = l?.FullName;
-                program.Run(fileName, directoryName, s, libraryName);
+            rootCommand.Handler = CommandHandler.Create<FileInfo, int, FileInfo>((i, s, l) => 
+            { 
+                program.Run(i, s, l); 
             });
 
             await rootCommand.InvokeAsync(args);
         }
 
-        public void Run(string inputName, string directoryName, int sigma, string libraryName)
+        public void Run(FileInfo input, int sigma, FileInfo library)
         {
-            var library = (IImplementation)null;
+            var implementation = (IImplementation)null;
 
-            if (libraryName != null)
+            if (library != null)
             {
-                library = ExternalImplementation.OpenImplementation(libraryName);
-                if (library == null)
+                implementation = ExternalImplementation.OpenImplementation(library.FullName);
+                if (implementation == null)
                 {
-                    Console.WriteLine("Failed to open dynamic library. Using default implementation.");
+                    Console.WriteLine("Failed to open dynamic library.");
+                    throw new Exception("Kupa. Zrobić to jak należy w dekalarcji polecenia cli.");
                 }
             }
 
-            if (library == null)
+            if (implementation == null)
             {
-                library = new DefaultImplementation();
+                implementation = new DefaultImplementation();
             }
 
             var noisy = (Bitmap)null;
@@ -72,10 +65,10 @@
             var mseOutput = 0.0f;
             var ssimNoisy = 0.0f;
             var ssimOutput = 0.0f;
-            var input = new Bitmap(inputName);
+            var inputBitmap = new Bitmap(input.FullName);
             var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
 
-            var denoiser = new Denoiser(input, library);
+            var denoiser = new Denoiser(inputBitmap, implementation);
             var millisecondsElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
             var time = TimeSpan.FromMilliseconds(millisecondsElapsed);
             Console.WriteLine("Time elapsed: {0}", time);
@@ -85,7 +78,7 @@
             noisy.Save($"noisy-{timeStamp}.png");
             output.Save($"filtered-{timeStamp}.png");
 
-            library.Dispose();
+            implementation.Dispose();
         }
     }
 }
