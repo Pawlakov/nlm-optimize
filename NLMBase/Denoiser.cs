@@ -280,5 +280,36 @@ namespace NLMBase
                 }
             }
         }
+    
+        public static bool CheckInputFile(string inputFilePath)
+        {
+            try
+            {
+                var bitmap = new Bitmap(inputFilePath);
+                var channels = Image.GetPixelFormatSize(bitmap.PixelFormat) / 8;
+                if (channels == 1 || channels == 3)
+                {
+                    return true;
+                }
+            }
+            catch { }
+
+            return false;
+        }
+    
+        public static bool CheckSigma(string value)
+        {
+            try
+            {
+                var number = int.Parse(value);
+                if (number >= 1 && number <= 100)
+                {
+                    return true;
+                }
+            }
+            catch { }
+
+            return false;
+        }
     }
 }

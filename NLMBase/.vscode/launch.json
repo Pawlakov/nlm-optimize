@@ -13,8 +13,8 @@
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
             "args": [
                 "-i", "red.jpg",
-                "-s", "70",
-                "-l", "NLMGpgpu1.so"
+                "-s", "70"//,
+                //"-l", "xd.jpg"
              ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

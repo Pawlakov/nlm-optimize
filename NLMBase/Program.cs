@@ -6,6 +6,7 @@
     using System.CommandLine.Parsing;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public class Program
@@ -15,21 +16,52 @@
             var inputOption = new Option<FileInfo>("-i", "Input file")
             {
                 IsRequired = true,
-            }.ExistingOnly();
+            };
+            inputOption.AddValidator(a => 
+                a.Tokens
+                     .Select(t => t.Value)
+                     .Where(filePath => !Denoiser.CheckInputFile(filePath))
+                     .Select(t => $"File {t} is not a valid image or does not exist.")
+                     .FirstOrDefault());
+
             var deviationOption = new Option<int>("-s", "Sigma")
             {
                 IsRequired = true,
             };
+            deviationOption.AddValidator(a => 
+                a.Tokens
+                     .Select(t => t.Value)
+                     .Where(value => !Denoiser.CheckSigma(value))
+                     .Select(t => $"Value {t} is not an integer number between 1 and 100.")
+                     .FirstOrDefault());
+
             var libraryOption = new Option<FileInfo>("-l", "Denoising library")
             {
                 IsRequired = false,
-            }.ExistingOnly();
+            };
+            libraryOption.AddValidator(a => 
+                a.Tokens
+                     .Select(t => t.Value)
+                     .Where(filePath => !ExternalImplementation.CheckImplementation(filePath))
+                     .Select(t => $"File {t} is not a valid NLM implementation or does not exist.")
+                     .FirstOrDefault());
+
             var rootCommand = new RootCommand ("NLM")
             {
                 inputOption,
                 deviationOption,
                 libraryOption,
             };
+
+            ValidateSymbol<CommandResult> validator = (symbolResult) => 
+            {
+                var options = symbolResult.Children.Select(x => x as OptionResult).Where(x => x != null);
+                var sigmaOption = options.FirstOrDefault(x => x?.Symbol?.Name == "s");
+                var inputOption = options.FirstOrDefault(x => x?.Symbol?.Name == "i");
+
+                return null;
+            };
+            rootCommand.AddValidator(validator);
 
             var program = new Program();
             rootCommand.Handler = CommandHandler.Create<FileInfo, int, FileInfo>((i, s, l) => 
@@ -50,7 +82,7 @@
                 if (implementation == null)
                 {
                     Console.WriteLine("Failed to open dynamic library.");
-                    throw new Exception("Kupa. Zrobić to jak należy w dekalarcji polecenia cli.");
+                    throw new Exception("What an unexpected surprise.");
                 }
             }
 

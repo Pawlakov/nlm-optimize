@@ -28,6 +28,20 @@ namespace NLMBase
             }
         }
 
+        public static bool CheckImplementation(string libraryName)
+        {
+            try
+            {
+                var instance = new ExternalImplementation(libraryName);
+                instance.Dispose();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public DenoiseFunction Denoise { get; }
 
         public void Dispose()
