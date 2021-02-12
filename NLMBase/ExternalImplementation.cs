@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -32,7 +33,8 @@ namespace NLMBase
         {
             try
             {
-                var instance = new ExternalImplementation(libraryName);
+                var file = new FileInfo(libraryName);
+                var instance = new ExternalImplementation(file.FullName);
                 instance.Dispose();
                 return true;
             }

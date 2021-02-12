@@ -147,43 +147,38 @@ extern void Denoise(int windowRadius, int blockRadius, float sigma, float fFiltP
 {
 	int channelLength = width * height;
 
-	hipStream_t stream;
-	hipStreamCreate(&stream);
-
-	dim3 gpuThreads(256, 1, 1);
-    dim3 gpuBlocks((channelLength + 256 - 1) / 256, 1, 1);
+	//dim3 gpuThreads(256, 1, 1);
+    //dim3 gpuBlocks((channelLength + 256 - 1) / 256, 1, 1);
 
 	size_t channelBytes = channelLength * sizeof(float);
     size_t totalBytes = channels * channelBytes;
 
     float* inputDevice;
-	float* totalWeightsDevice;
+	//float* totalWeightsDevice;
     HIP_CHECK(hipMalloc(&inputDevice, totalBytes));
-	HIP_CHECK(hipMalloc(&totalWeightsDevice, channelBytes));
-    for (int i = 0; i < channels; i++)
-    {
-        HIP_CHECK(hipMemcpyAsync(inputDevice + i * channelLength, input[i], channelBytes, hipMemcpyHostToDevice, stream));
-    }
+	//HIP_CHECK(hipMalloc(&totalWeightsDevice, channelBytes));
+    //for (int i = 0; i < channels; i++)
+    //{
+    //    HIP_CHECK(hipMemcpyAsync(inputDevice + i * channelLength, input[i], channelBytes, hipMemcpyHostToDevice));
+    //}
 
-    hipLaunchKernelGGL(getGlobalWeightsKernel, gpuBlocks, gpuThreads, 0, stream, totalWeightsDevice, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, channels, width, height);
-    HIP_CHECK(hipGetLastError());
+    //hipLaunchKernelGGL(getGlobalWeightsKernel, gpuBlocks, gpuThreads, 0, 0, totalWeightsDevice, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, channels, width, height);
+    //HIP_CHECK(hipGetLastError());
 
 	//
 
-	float* outputDevice;
-	HIP_CHECK(hipMalloc(&outputDevice, totalBytes));
+	//float* outputDevice;
+	//HIP_CHECK(hipMalloc(&outputDevice, totalBytes));
 
-    hipLaunchKernelGGL(filterKernel, gpuBlocks, gpuThreads, 0, stream, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, outputDevice, channels, width, height, totalWeightsDevice);
-    HIP_CHECK(hipGetLastError());
+    //hipLaunchKernelGGL(filterKernel, gpuBlocks, gpuThreads, 0, 0, windowRadius, blockRadius, sigma, fFiltPar, inputDevice, outputDevice, channels, width, height, totalWeightsDevice);
+    //HIP_CHECK(hipGetLastError());
 
-	for (int i = 0; i < channels; i++)
-    {
-        HIP_CHECK(hipMemcpyAsync(output[i], outputDevice + i * channelLength, channelBytes, hipMemcpyDeviceToHost, stream));
-    }
+	//for (int i = 0; i < channels; i++)
+    //{
+    //    HIP_CHECK(hipMemcpyAsync(output[i], outputDevice + i * channelLength, channelBytes, hipMemcpyDeviceToHost));
+    //}
 
     HIP_CHECK(hipFree(inputDevice));
-	HIP_CHECK(hipFree(outputDevice));
-	HIP_CHECK(hipFree(totalWeightsDevice));
-
-	hipStreamDestroy(stream);
+	//HIP_CHECK(hipFree(outputDevice));
+	//HIP_CHECK(hipFree(totalWeightsDevice));
 }
