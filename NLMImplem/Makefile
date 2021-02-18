@@ -1,7 +1,7 @@
 .PHONY: NLMBasic
 NLMBasic: NLMBasic.so
 	cp NLMBasic.so ../NLMBase
-	cp NLMBasic.so ../NLMBase/bin/Release/netcoreapp3.1
+	cp NLMBasic.so ../NLMBase/bin/Release/net5.0
 	rm -f NLMBasic.o NLMBasic.so
 
 NLMBasic.so: NLMBasic.o
@@ -13,7 +13,7 @@ NLMBasic.o: NLMBasic.cpp NLMBasic.h
 .PHONY: NLMPlain
 NLMPlain: NLMPlain.so
 	cp NLMPlain.so ../NLMBase
-	cp NLMPlain.so ../NLMBase/bin/Release/netcoreapp3.1
+	cp NLMPlain.so ../NLMBase/bin/Release/net5.0
 	rm -f NLMPlain.o NLMPlain.so
 
 NLMPlain.so: NLMPlain.o
@@ -25,7 +25,7 @@ NLMPlain.o: NLMPlain.cpp NLMPlain.h
 .PHONY: NLMGpgpu0
 NLMGpgpu0: NLMGpgpu0.so
 	cp NLMGpgpu0.so ../NLMBase
-	cp NLMGpgpu0.so ../NLMBase/bin/Release/netcoreapp3.1
+	cp NLMGpgpu0.so ../NLMBase/bin/Release/net5.0
 	rm -f NLMGpgpu0.hip.o NLMGpgpu0.so
 
 NLMGpgpu0.so: NLMGpgpu0.hip.o
@@ -37,7 +37,7 @@ NLMGpgpu0.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
 .PHONY: NLMGpgpu1
 NLMGpgpu1: NLMGpgpu1.so
 	cp NLMGpgpu1.so ../NLMBase
-	cp NLMGpgpu1.so ../NLMBase/bin/Release/netcoreapp3.1
+	cp NLMGpgpu1.so ../NLMBase/bin/Release/net5.0
 	rm -f NLMGpgpu1.hip.o NLMGpgpu1.so
 
 NLMGpgpu1.so: NLMGpgpu1.hip.o

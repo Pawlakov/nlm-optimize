@@ -1,47 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace NLMBase
 {
     public class ExternalImplementation : IImplementation
     {
+        private const string Symbol = "_Z7DenoiseiiffPPfS0_iii";
+
         private IntPtr libraryHandle;
 
-        private ExternalImplementation(string libraryName)
+        private ExternalImplementation(FileInfo libraryFile)
         {
-            this.libraryHandle =  NativeLibrary.Load(libraryName);
-            var functionAddress = NativeLibrary.GetExport(this.libraryHandle, "_Z7DenoiseiiffPPfS0_iii");
+            this.libraryHandle =  NativeLibrary.Load(libraryFile.FullName);
+            var functionAddress = NativeLibrary.GetExport(this.libraryHandle, Symbol);
             this.Denoise = Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(DenoiseFunction)) as DenoiseFunction;
         }
 
         public static IImplementation OpenImplementation(string libraryName)
         {
-            try
+            
+            var file = new FileInfo(libraryName);
+            if (!file.Exists)
             {
-                return new ExternalImplementation(libraryName);
+                throw new Exception("File not found.");
             }
-            catch
-            {
-                return null;
-            }
-        }
 
-        public static bool CheckImplementation(string libraryName)
-        {
-            try
-            {
-                var file = new FileInfo(libraryName);
-                var instance = new ExternalImplementation(file.FullName);
-                instance.Dispose();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return new ExternalImplementation(file);
         }
 
         public DenoiseFunction Denoise { get; }
@@ -51,6 +36,7 @@ namespace NLMBase
             if (this.libraryHandle != IntPtr.Zero)
             {
                 NativeLibrary.Free(this.libraryHandle);
+                this.libraryHandle = IntPtr.Zero;
             }
         }
     }

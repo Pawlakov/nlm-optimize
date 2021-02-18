@@ -42,8 +42,8 @@
             libraryOption.AddValidator(a => 
                 a.Tokens
                      .Select(t => t.Value)
-                     .Where(filePath => !ExternalImplementation.CheckImplementation(filePath))
-                     .Select(t => $"File {t} is not a valid NLM implementation or does not exist.")
+                     .Where(filePath => !File.Exists(filePath))
+                     .Select(t => $"File {t} does not exist.")
                      .FirstOrDefault());
 
             var rootCommand = new RootCommand ("NLM")
@@ -78,39 +78,43 @@
 
             if (library != null)
             {
-                implementation = ExternalImplementation.OpenImplementation(library.FullName);
-                if (implementation == null)
+                try
                 {
-                    Console.WriteLine("Failed to open dynamic library.");
-                    throw new Exception("What an unexpected surprise.");
+                    implementation = ExternalImplementation.OpenImplementation(library.FullName);
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine("Failed to open the dynamic library. {0}", exception.Message);
                 }
             }
-
-            if (implementation == null)
+            else
             {
                 implementation = new DefaultImplementation();
             }
 
-            var noisy = (Bitmap)null;
-            var output = (Bitmap)null;
-            var mseNoisy = 0.0f;
-            var mseOutput = 0.0f;
-            var ssimNoisy = 0.0f;
-            var ssimOutput = 0.0f;
-            var inputBitmap = new Bitmap(input.FullName);
-            var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
+            if (implementation != null)
+            {
+                var noisy = (Bitmap)null;
+                var output = (Bitmap)null;
+                var mseNoisy = 0.0f;
+                var mseOutput = 0.0f;
+                var ssimNoisy = 0.0f;
+                var ssimOutput = 0.0f;
+                var inputBitmap = new Bitmap(input.FullName);
+                var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
 
-            var denoiser = new Denoiser(inputBitmap, implementation);
-            var millisecondsElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
-            var time = TimeSpan.FromMilliseconds(millisecondsElapsed);
-            Console.WriteLine("Time elapsed: {0}", time);
-            Console.WriteLine("MSE: {0} -> {1}", mseNoisy, mseOutput);
-            Console.WriteLine("SSIM: {0} -> {1}", ssimNoisy, ssimOutput);
+                var denoiser = new Denoiser(inputBitmap, implementation);
+                var millisecondsElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
+                var time = TimeSpan.FromMilliseconds(millisecondsElapsed);
+                Console.WriteLine("Time elapsed: {0}", time);
+                Console.WriteLine("MSE: {0} -> {1}", mseNoisy, mseOutput);
+                Console.WriteLine("SSIM: {0} -> {1}", ssimNoisy, ssimOutput);
 
-            noisy.Save($"noisy-{timeStamp}.png");
-            output.Save($"filtered-{timeStamp}.png");
+                noisy.Save($"noisy-{timeStamp}.png");
+                output.Save($"filtered-{timeStamp}.png");
 
-            implementation.Dispose();
+                implementation.Dispose();
+            }
         }
     }
 }
