@@ -10,11 +10,11 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/NLMBase.dll",
+            "program": "${workspaceFolder}/bin/Debug/net5.0/NLMBase.dll",
             "args": [
-                "-i", "wallpaper.jpg",
+                "-i", "osmosis.jpg",
                 "-s", "25",
-                "-l", "NLMGpgpu1.so"
+                "-l", "NLMGpgpu0.so"
              ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

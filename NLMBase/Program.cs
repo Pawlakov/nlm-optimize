@@ -96,10 +96,10 @@
             {
                 var noisy = (Bitmap)null;
                 var output = (Bitmap)null;
-                var mseNoisy = 0.0f;
-                var mseOutput = 0.0f;
-                var ssimNoisy = 0.0f;
-                var ssimOutput = 0.0f;
+                var mseNoisy = (float?)null;
+                var mseOutput = (float?)null;
+                var ssimNoisy = (float?)null;
+                var ssimOutput = (float?)null;
                 var inputBitmap = new Bitmap(input.FullName);
                 var timeStamp = string.Format("{0:yyyy-MM-dd_HH-mm-ss-fff}", DateTime.Now);
 
@@ -107,11 +107,26 @@
                 var millisecondsElapsed = denoiser.Work(sigma, out noisy, out output, out mseNoisy, out mseOutput, out ssimNoisy, out ssimOutput);
                 var time = TimeSpan.FromMilliseconds(millisecondsElapsed);
                 Console.WriteLine("Time elapsed: {0}", time);
-                Console.WriteLine("MSE: {0} -> {1}", mseNoisy, mseOutput);
-                Console.WriteLine("SSIM: {0} -> {1}", ssimNoisy, ssimOutput);
+                if (mseNoisy != null && mseOutput != null)
+                {
+                    Console.WriteLine("MSE: {0} -> {1}", mseNoisy, mseOutput);
+                }
+                else
+                {
+                    Console.WriteLine("MSE: could not be calculated.");
+                }
 
-                noisy.Save($"noisy-{timeStamp}.png");
-                output.Save($"filtered-{timeStamp}.png");
+                if (ssimNoisy != null && ssimOutput != null)
+                {
+                    Console.WriteLine("SSIM: {0} -> {1}", ssimNoisy, ssimOutput);
+                }
+                else
+                {
+                    Console.WriteLine("SSIM: could not be calculated.");
+                }
+
+                noisy.Save($"{input.Name}-noisy-{timeStamp}.png");
+                output.Save($"{input.Name}-filtered-{timeStamp}.png");
 
                 implementation.Dispose();
             }

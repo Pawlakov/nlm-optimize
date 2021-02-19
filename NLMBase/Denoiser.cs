@@ -45,7 +45,7 @@ namespace NLMBase
             this.library = library;
         }
 
-        public long Work(int sigma, out Bitmap noisy, out Bitmap result, out float mseNoisy, out float mseResult, out float ssimNoisy, out float ssimResult)
+        public long Work(int sigma, out Bitmap noisy, out Bitmap result, out float? mseNoisy, out float? mseResult, out float? ssimNoisy, out float? ssimResult)
         {
             var inputChannels = UnwrapChannels(this.inputArray);
 
@@ -76,10 +76,41 @@ namespace NLMBase
             //result.UnlockBits(resultData);
             this.WriteBitemapTheDumbWay(result, resultArray);
 
-            mseResult = this.MSE(this.inputArray, resultArray);
-            mseNoisy = this.MSE(this.inputArray, noisyArray);
-            ssimResult = this.SSIM(this.inputArray, resultArray);
-            ssimNoisy = this.SSIM(this.inputArray, noisyArray);
+            try
+            {
+                mseResult = this.MSE(this.inputArray, resultArray);
+            }
+            catch
+            {
+                mseResult = null;
+            }
+
+            try
+            {
+                mseNoisy = this.MSE(this.inputArray, noisyArray);
+            }
+            catch
+            {
+                mseNoisy = null;
+            }
+
+            try
+            {
+                ssimResult = this.SSIM(this.inputArray, resultArray);
+            }
+            catch
+            {
+                ssimResult = null;
+            }
+
+            try
+            {
+                ssimNoisy = this.SSIM(this.inputArray, noisyArray);
+            }
+            catch
+            {
+                ssimNoisy = null;
+            }
 
             return watch.ElapsedMilliseconds;
         }
