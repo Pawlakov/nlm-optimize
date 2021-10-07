@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "NLMBaseGUI.WinUI": {
-      "commandName": "AppContainer"
-    }
-  }
-}

@@ -1,3 +1,0 @@
-namespace UnoTest.Skia.Gtk
-{
-}
