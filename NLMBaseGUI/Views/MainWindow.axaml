@@ -15,14 +15,20 @@
 		<conv:BitmapValueConverter x:Key="imageConverter"/>
 	</Window.Resources>
 	<Window.Styles>
+		<Style Selector="Border.ImagePlaceholder">
+			<Setter Property="Background" Value="LightGray"/>
+			<Setter Property="Height" Value="512"/>
+			<Setter Property="Margin" Value="4"/>
+		</Style>
 		<Style Selector="Border.Frame">
 			<Setter Property="BorderBrush" Value="DarkGray"/>
 			<Setter Property="BorderThickness" Value="1"/>
 			<Setter Property="CornerRadius" Value="4"/>
 			<Setter Property="Margin" Value="4"/>
 		</Style>
-		<Style Selector="Image.Margin">
+		<Style Selector="Image.PreviewImage">
 			<Setter Property="Margin" Value="4"/>
+			<Setter Property="Height" Value="512"/>
 		</Style>
 		<Style Selector="Button.Margin">
 			<Setter Property="Margin" Value="4"/>
@@ -41,8 +47,15 @@
 		<TabControl Classes="Margin">
 				<TabItem Header="Czysty" VerticalContentAlignment="Center">
 					<StackPanel>
-						<Border Classes="Frame">
-							<Image Classes="Margin" Source="{Binding RawImage, Converter={StaticResource imageConverter}}"/>
+						<Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNotNull}}">
+							<Image Classes="PreviewImage" Source="{Binding RawImage, Converter={StaticResource imageConverter}}"/>
+						</Border>
+						<Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNull}}">
+							<StackPanel>
+								<Border Classes="ImagePlaceholder">
+									<TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+								</Border>
+							</StackPanel>
 						</Border>
 						<Border Classes="Frame">
 							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -55,7 +68,7 @@
 				<TabItem Header="Zaszumiony" VerticalContentAlignment="Center">
 					<StackPanel Orientation="Vertical">
 						<Border Classes="Frame">
-							<Image Classes="Margin"/>
+							<Image Classes="PreviewImage"/>
 						</Border>
 						<Border Classes="Frame">
 							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -69,7 +82,7 @@
 				<TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
 					<StackPanel Orientation="Vertical">
 						<Border Classes="Frame">
-							<Image Classes="Margin"/>
+							<Image Classes="PreviewImage"/>
 						</Border>
 						<Border Classes="Frame">
 							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

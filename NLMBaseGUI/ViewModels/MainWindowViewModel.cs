@@ -35,7 +35,7 @@ namespace NLMBaseGUI.ViewModels
             input.UnlockBits(inputData);
             */
 
-            this.rawImage = File.ReadAllBytes(@"C:\Users\pmatu\Desktop\flasz.png");
+            /*this.rawImage = File.ReadAllBytes(@"/home/pawlakov/Pulpit/ani uwu.jpg");*/
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
             this.MakeNoisyCommand = ReactiveCommand.Create(this.MakeNoisy);
@@ -63,8 +63,13 @@ namespace NLMBaseGUI.ViewModels
 
         public ReactiveCommand<Unit, Unit> SaveFilteredCommand { get; }
 
-        private void LoadRaw()
+        private async Task LoadRaw()
         {
+            var dialog = new Avalonia.Controls.OpenFileDialog();
+            if (await dialog.ShowAsync() == true)
+            {
+                this.rawImage = File.ReadAllBytes(dialog.File);
+            }
         }
 
         private void MakeNoisy()
