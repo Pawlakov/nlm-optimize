@@ -1,103 +1,119 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:NLMBaseGUI.ViewModels"
-		xmlns:conv="using:NLMBaseGUI.Converters"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="NLMBaseGUI.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="NLMBaseGUI">
+<rxui:ReactiveWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:vm="using:NLMBaseGUI.ViewModels"
+                     xmlns:conv="using:NLMBaseGUI.Converters"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:rxui="http://reactiveui.net"
+                     mc:Ignorable="d"
+                     x:Class="NLMBaseGUI.Views.MainWindow"
+                     x:TypeArguments="vm:MainWindowViewModel"
+                     Icon="/Assets/avalonia-logo.ico"
+                     Title="NLMBaseGUI">
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-	<Window.Resources>
-		<conv:BitmapValueConverter x:Key="imageConverter"/>
-	</Window.Resources>
-	<Window.Styles>
-		<Style Selector="Border.ImagePlaceholder">
-			<Setter Property="Background" Value="LightGray"/>
-			<Setter Property="Height" Value="512"/>
-			<Setter Property="Margin" Value="4"/>
-		</Style>
-		<Style Selector="Border.Frame">
-			<Setter Property="BorderBrush" Value="DarkGray"/>
-			<Setter Property="BorderThickness" Value="1"/>
-			<Setter Property="CornerRadius" Value="4"/>
-			<Setter Property="Margin" Value="4"/>
-		</Style>
-		<Style Selector="Image.PreviewImage">
-			<Setter Property="Margin" Value="4"/>
-			<Setter Property="Height" Value="512"/>
-		</Style>
-		<Style Selector="Button.Margin">
-			<Setter Property="Margin" Value="4"/>
-		</Style>
-		<Style Selector="TabControl.Margin">
-			<Setter Property="Margin" Value="4"/>
-		</Style>
-		<Style Selector="TextBox.Margin">
-			<Setter Property="Margin" Value="4"/>
-		</Style>
-		<Style Selector="ComboBox.Margin">
-			<Setter Property="Margin" Value="4"/>
-		</Style>
-	</Window.Styles>
-	<StackPanel Orientation="Vertical">
-		<TabControl Classes="Margin">
-				<TabItem Header="Czysty" VerticalContentAlignment="Center">
-					<StackPanel>
-						<Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNotNull}}">
-							<Image Classes="PreviewImage" Source="{Binding RawImage, Converter={StaticResource imageConverter}}"/>
+    <Window.Resources>
+        <conv:BitmapValueConverter x:Key="imageConverter"/>
+    </Window.Resources>
+    <Window.Styles>
+        <Style Selector="Border.ImagePlaceholder">
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Height" Value="512"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style Selector="Border.Frame">
+            <Setter Property="BorderBrush" Value="DarkGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style Selector="Image.PreviewImage">
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Height" Value="512"/>
+        </Style>
+        <Style Selector="Button.Margin">
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style Selector="TabControl.Margin">
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style Selector="TextBox.Margin">
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style Selector="ComboBox.Margin">
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+    </Window.Styles>
+    <StackPanel Orientation="Vertical">
+        <TabControl Classes="Margin">
+                <TabItem Header="Czysty" VerticalContentAlignment="Center">
+                    <StackPanel>
+                        <Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <Image Classes="PreviewImage" Source="{Binding RawImage, Converter={StaticResource imageConverter}}"/>
+                        </Border>
+                        <Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNull}}">
+                            <StackPanel>
+                                <Border Classes="ImagePlaceholder">
+                                    <TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="Frame">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Classes="Margin" Command="{Binding LoadRawCommand}" Content="Wczytaj"/>
+                                <Button Classes="Margin" Command="{Binding MakeNoisyCommand}" Content="Dodaj szum"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Zaszumiony" VerticalContentAlignment="Center">
+                    <StackPanel Orientation="Vertical">
+						<Border Classes="Frame" IsVisible="{Binding NoisyImage, Converter={x:Static ObjectConverters.IsNotNull}}">
+							<Image Classes="PreviewImage" Source="{Binding NoisyImage, Converter={StaticResource imageConverter}}"/>
 						</Border>
-						<Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNull}}">
+						<Border Classes="Frame" IsVisible="{Binding NoisyImage, Converter={x:Static ObjectConverters.IsNull}}">
 							<StackPanel>
 								<Border Classes="ImagePlaceholder">
 									<TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 								</Border>
 							</StackPanel>
 						</Border>
-						<Border Classes="Frame">
-							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-								<Button Classes="Margin" Command="{Binding LoadRawCommand}" Content="Wczytaj"/>
-								<Button Classes="Margin" Command="{Binding MakeNoisyCommand}" Content="Dodaj szum"/>
+                        <Border Classes="Frame">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
+                                <Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
+                                <Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
+                    <StackPanel Orientation="Vertical">
+						<Border Classes="Frame" IsVisible="{Binding FilteredImage, Converter={x:Static ObjectConverters.IsNotNull}}">
+							<Image Classes="PreviewImage" Source="{Binding FilteredImage, Converter={StaticResource imageConverter}}"/>
+						</Border>
+						<Border Classes="Frame" IsVisible="{Binding FilteredImage, Converter={x:Static ObjectConverters.IsNull}}">
+							<StackPanel>
+								<Border Classes="ImagePlaceholder">
+									<TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+								</Border>
 							</StackPanel>
 						</Border>
-					</StackPanel>
-				</TabItem>
-				<TabItem Header="Zaszumiony" VerticalContentAlignment="Center">
-					<StackPanel Orientation="Vertical">
-						<Border Classes="Frame">
-							<Image Classes="PreviewImage"/>
-						</Border>
-						<Border Classes="Frame">
-							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-								<Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
-								<Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
-								<Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
-							</StackPanel>
-						</Border>
-					</StackPanel>
-				</TabItem>
-				<TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
-					<StackPanel Orientation="Vertical">
-						<Border Classes="Frame">
-							<Image Classes="PreviewImage"/>
-						</Border>
-						<Border Classes="Frame">
-							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-								<Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
-								<Button Classes="Margin" Content="Pokaż statystyki"/><!-- To załatwić w widoku samym może? -->
-							</StackPanel>
-						</Border>
-					</StackPanel>
-				</TabItem>
-			</TabControl>
-		<Border Classes="Frame" Margin="24,4,24,4">
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox Classes="Margin"/>
-				<ComboBox Classes="Margin"/>
-			</StackPanel>
-		</Border>
-	</StackPanel>
-</Window>
+                        <Border Classes="Frame">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
+                                <Button Classes="Margin" Content="Pokaż statystyki"/><!-- To załatwić w widoku samym może? -->
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        <Border Classes="Frame" Margin="24,4,24,4">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBox Classes="Margin"/>
+                <ComboBox Classes="Margin"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</rxui:ReactiveWindow>

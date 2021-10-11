@@ -4,10 +4,12 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,11 +26,15 @@ namespace NLMBaseGUI.Converters
                 return null;
             }
 
-            if (value is byte[] bytes && targetType.IsAssignableFrom(typeof(Bitmap)))
+            if (value is System.Drawing.Bitmap input && targetType.IsAssignableFrom(typeof(Bitmap)))
             {
-                using (var stream = new MemoryStream(bytes))
+                using (var outerStream = new MemoryStream())
                 {
-                    return new Bitmap(stream);
+                    input.Save(outerStream, ImageFormat.Png);
+                    using (var innerStream = new MemoryStream(outerStream.ToArray()))
+                    {
+                        return new Bitmap(innerStream);
+                    }
                 }
             }
 

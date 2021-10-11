@@ -7,12 +7,15 @@ using System.IO;
 using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NLMBaseGUI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private byte[] rawImage;
+        private Bitmap rawImage;
+        private Bitmap noisyImage;
+        private Bitmap filteredImage;
 
         public MainWindowViewModel()
         {
@@ -37,6 +40,9 @@ namespace NLMBaseGUI.ViewModels
 
             /*this.rawImage = File.ReadAllBytes(@"/home/pawlakov/Pulpit/ani uwu.jpg");*/
 
+            this.ShowOpenFileDialog = new Interaction<Unit, string?>();
+            this.ShowSaveFileDialog = new Interaction<Unit, string?>();
+
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
             this.MakeNoisyCommand = ReactiveCommand.Create(this.MakeNoisy);
             this.LoadNoisyCommand = ReactiveCommand.Create(this.LoadNoisy);
@@ -45,11 +51,27 @@ namespace NLMBaseGUI.ViewModels
             this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered);
         }
 
-        public byte[] RawImage
+        public Bitmap RawImage
         {
             get => this.rawImage;
             set => this.RaiseAndSetIfChanged(ref this.rawImage, value);
         }
+
+        public Bitmap NoisyImage
+        {
+            get => this.noisyImage;
+            set => this.RaiseAndSetIfChanged(ref this.noisyImage, value);
+        }
+
+        public Bitmap FilteredImage
+        {
+            get => this.filteredImage;
+            set => this.RaiseAndSetIfChanged(ref this.filteredImage, value);
+        }
+
+        public Interaction<Unit, string?> ShowOpenFileDialog { get; }
+
+        public Interaction<Unit, string?> ShowSaveFileDialog { get; }
 
         public ReactiveCommand<Unit, Unit> LoadRawCommand { get; }
 
@@ -63,13 +85,12 @@ namespace NLMBaseGUI.ViewModels
 
         public ReactiveCommand<Unit, Unit> SaveFilteredCommand { get; }
 
-        private async Task LoadRaw()
+        private void LoadRaw()
         {
-            var dialog = new Avalonia.Controls.OpenFileDialog();
-            if (await dialog.ShowAsync() == true)
+            this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(x => 
             {
-                this.rawImage = File.ReadAllBytes(dialog.File);
-            }
+                this.RawImage = new Bitmap(x);
+            });
         }
 
         private void MakeNoisy()
@@ -78,10 +99,18 @@ namespace NLMBaseGUI.ViewModels
 
         private void LoadNoisy()
         {
+            this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(x =>
+            {
+                this.NoisyImage = new Bitmap(x);
+            });
         }
 
         private void SaveNoisy()
         {
+            this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(x =>
+            {
+                this.NoisyImage.Save(x);
+            });
         }
 
         private void MakeFiltered()
@@ -90,6 +119,10 @@ namespace NLMBaseGUI.ViewModels
 
         private void SaveFiltered()
         {
+            this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(x =>
+            {
+                this.FilteredImage.Save(x);
+            });
         }
     }
 }
