@@ -1,16 +1,16 @@
-using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Reactive;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace NLMBaseGUI.ViewModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.IO;
+    using System.Reactive;
+    using System.Runtime.InteropServices;
+    using System.Text;
+    using System.Threading.Tasks;
+    using ReactiveUI;
+
     public class MainWindowViewModel : ViewModelBase
     {
         private Bitmap rawImage;
@@ -42,6 +42,7 @@ namespace NLMBaseGUI.ViewModels
 
             this.ShowOpenFileDialog = new Interaction<Unit, string?>();
             this.ShowSaveFileDialog = new Interaction<Unit, string?>();
+            this.ShowMessageBox = new Interaction<string, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
             this.MakeNoisyCommand = ReactiveCommand.Create(this.MakeNoisy);
@@ -73,6 +74,8 @@ namespace NLMBaseGUI.ViewModels
 
         public Interaction<Unit, string?> ShowSaveFileDialog { get; }
 
+        public Interaction<string, Unit> ShowMessageBox { get; }
+
         public ReactiveCommand<Unit, Unit> LoadRawCommand { get; }
 
         public ReactiveCommand<Unit, Unit> MakeNoisyCommand { get; }
@@ -87,42 +90,158 @@ namespace NLMBaseGUI.ViewModels
 
         private void LoadRaw()
         {
-            this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(x => 
+            try
             {
-                this.RawImage = new Bitmap(x);
-            });
+                this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(
+                    x =>
+                    {
+                        try
+                        {
+                            if (x == null)
+                            {
+                                this.RawImage = null;
+                            }
+                            else
+                            {
+                                this.RawImage = new Bitmap(x);
+                            }
+                        }
+                        catch
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }
+                    },
+                    x =>
+                    {
+                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                    },
+                    () =>
+                    {
+                    });
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
         }
 
         private void MakeNoisy()
         {
+            try
+            {
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
         }
 
         private void LoadNoisy()
         {
-            this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(x =>
+            try
             {
-                this.NoisyImage = new Bitmap(x);
-            });
+                this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(
+                    x =>
+                    {
+                        try
+                        {
+                            if (x == null)
+                            {
+                                this.NoisyImage = null;
+                            }
+                            else
+                            {
+                                this.NoisyImage = new Bitmap(x);
+                            }
+                        }
+                        catch
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }
+                    },
+                    x =>
+                    {
+                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                    },
+                    () =>
+                    {
+                    });
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
         }
 
         private void SaveNoisy()
         {
-            this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(x =>
+            try
             {
-                this.NoisyImage.Save(x);
-            });
+                this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
+                    x =>
+                    {
+                        try
+                        {
+                            this.NoisyImage.Save(x);
+                        }
+                        catch
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }
+                    },
+                    x =>
+                    {
+                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                    },
+                    () =>
+                    {
+                    });
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
         }
 
         private void MakeFiltered()
         {
+            try
+            {
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
         }
 
         private void SaveFiltered()
         {
-            this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(x =>
+            try
             {
-                this.FilteredImage.Save(x);
-            });
+                this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
+                    x =>
+                    {
+                        try
+                        {
+                            this.FilteredImage.Save(x);
+                        }
+                        catch
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }
+                    },
+                    x =>
+                    {
+                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                    },
+                    () =>
+                    {
+                    });
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
         }
     }
 }
