@@ -111,8 +111,14 @@
             </TabControl>
         <Border Classes="Frame" Margin="24,4,24,4">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBox Classes="Margin"/>
-                <ComboBox Classes="Margin"/>
+				<StackPanel Orientation="Vertical">
+					<TextBlock Text="Sigma"/>
+					<TextBox Classes="Margin" Text="{Binding Sigma}"/>
+				</StackPanel>
+				<StackPanel Orientation="Vertical">
+					<TextBlock Text="Implementacja"/>
+					<ComboBox Classes="Margin"/>
+				</StackPanel>
             </StackPanel>
         </Border>
     </StackPanel>

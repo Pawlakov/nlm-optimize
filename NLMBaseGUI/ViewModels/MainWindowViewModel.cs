@@ -17,6 +17,7 @@ namespace NLMBaseGUI.ViewModels
         private Bitmap rawImage;
         private Bitmap noisyImage;
         private Bitmap filteredImage;
+        private int sigma;
 
         public MainWindowViewModel()
         {
@@ -69,6 +70,31 @@ namespace NLMBaseGUI.ViewModels
         {
             get => this.filteredImage;
             set => this.RaiseAndSetIfChanged(ref this.filteredImage, value);
+        }
+
+        public string Sigma
+        {
+            get => this.sigma.ToString();
+            set
+            {
+                if (int.TryParse(value, out var parsed))
+                {
+                    if (parsed > 100)
+                    {
+                        parsed = 100;
+                    }
+                    else if (parsed < 0)
+                    {
+                        parsed = 0;
+                    }
+
+                    this.RaiseAndSetIfChanged(ref this.sigma, parsed);
+                }
+                else
+                {
+                    this.RaisePropertyChanged();
+                }
+            }
         }
 
         public Interaction<Unit, string?> ShowOpenFileDialog { get; }
