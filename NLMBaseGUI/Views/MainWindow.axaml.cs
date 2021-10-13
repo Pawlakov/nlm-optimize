@@ -8,6 +8,9 @@ namespace NLMBaseGUI.Views
     using Avalonia.Controls;
     using Avalonia.Markup.Xaml;
     using Avalonia.ReactiveUI;
+    using global::MessageBox.Avalonia;
+    using global::MessageBox.Avalonia.DTO;
+    using global::MessageBox.Avalonia.Enums;
     using NLMBaseGUI.ViewModels;
     using ReactiveUI;
 
@@ -84,7 +87,16 @@ namespace NLMBaseGUI.Views
 
         private async Task ShowMessageBox(InteractionContext<string, Unit> interaction)
         {
-            await MessageBox.Show(this, interaction.Input, "Test title", MessageBox.MessageBoxButtons.Ok);
+            var msBoxStandardWindow = MessageBoxManager
+                .GetMessageBoxStandardWindow(new MessageBoxStandardParams
+                {
+                    ButtonDefinitions = ButtonEnum.Ok,
+                    ContentTitle = "B³¹d",
+                    ContentMessage = interaction.Input,
+                    Icon = global::MessageBox.Avalonia.Enums.Icon.Error,
+                });
+
+            await msBoxStandardWindow.Show();
         }
     }
 }

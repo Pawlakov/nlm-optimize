@@ -9,6 +9,7 @@ namespace NLMBaseGUI.ViewModels
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading.Tasks;
+    using Avalonia.Threading;
     using ReactiveUI;
 
     public class MainWindowViewModel : ViewModelBase
@@ -108,12 +109,18 @@ namespace NLMBaseGUI.ViewModels
                         }
                         catch
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            }).Wait();
                         }
                     },
                     x =>
                     {
-                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }).Wait();
                     },
                     () =>
                     {
@@ -156,12 +163,18 @@ namespace NLMBaseGUI.ViewModels
                         }
                         catch
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            }).Wait();
                         }
                     },
                     x =>
                     {
-                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }).Wait();
                     },
                     () =>
                     {
@@ -186,12 +199,18 @@ namespace NLMBaseGUI.ViewModels
                         }
                         catch
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            }).Wait();
                         }
                     },
                     x =>
                     {
-                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }).Wait();
                     },
                     () =>
                     {
@@ -227,12 +246,18 @@ namespace NLMBaseGUI.ViewModels
                         }
                         catch
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            }).Wait();
                         }
                     },
                     x =>
                     {
-                        this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }).Wait();
                     },
                     () =>
                     {
