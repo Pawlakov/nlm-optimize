@@ -2,6 +2,7 @@
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:vm="using:NLMBaseGUI.ViewModels"
                      xmlns:conv="using:NLMBaseGUI.Converters"
+					 xmlns:behav="using:NLMBaseGUI.Behaviors"
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:rxui="http://reactiveui.net"
@@ -113,7 +114,11 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
 				<StackPanel Orientation="Vertical">
 					<TextBlock Text="Sigma"/>
-					<TextBox Classes="Margin" Text="{Binding Sigma}"/>
+					<TextBox Classes="Margin">
+						<Interaction.Behaviors>
+							<behav:LostFocusUpdateBindingBehavior Text="{Binding Sigma}"/>
+						</Interaction.Behaviors>
+					</TextBox>
 				</StackPanel>
 				<StackPanel Orientation="Vertical">
 					<TextBlock Text="Implementacja"/>

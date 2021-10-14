@@ -2,6 +2,7 @@ namespace NLMBaseGUI.ViewModels
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
@@ -10,10 +11,13 @@ namespace NLMBaseGUI.ViewModels
     using System.Text;
     using System.Threading.Tasks;
     using Avalonia.Threading;
+    using NLMBaseGUI.Services;
     using ReactiveUI;
 
     public class MainWindowViewModel : ViewModelBase
     {
+        private readonly NoiseService noiseService;
+
         private Bitmap rawImage;
         private Bitmap noisyImage;
         private Bitmap filteredImage;
@@ -21,6 +25,8 @@ namespace NLMBaseGUI.ViewModels
 
         public MainWindowViewModel()
         {
+            this.noiseService = new NoiseService();
+
             /*
             var input = new Bitmap(@"C:\Users\pmatu\Desktop\flasz.png");
 
@@ -88,12 +94,11 @@ namespace NLMBaseGUI.ViewModels
                         parsed = 0;
                     }
 
-                    this.RaiseAndSetIfChanged(ref this.sigma, parsed);
+                    this.sigma = parsed;
                 }
-                else
-                {
-                    this.RaisePropertyChanged();
-                }
+
+                Debug.WriteLine(this.sigma);
+                this.RaisePropertyChanged();
             }
         }
 
@@ -162,6 +167,8 @@ namespace NLMBaseGUI.ViewModels
         {
             try
             {
+                var noisyBitmap = this.noiseService.MakeNoisy(this.rawImage, this.sigma);
+                this.NoisyImage = noisyBitmap;
             }
             catch
             {
