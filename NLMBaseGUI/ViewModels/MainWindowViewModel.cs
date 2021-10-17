@@ -18,6 +18,8 @@ namespace NLMBaseGUI.ViewModels
     {
         private readonly NoiseService noiseService;
 
+        private bool isProcessing;
+        private int selectedTab;
         private Bitmap rawImage;
         private Bitmap noisyImage;
         private Bitmap filteredImage;
@@ -53,11 +55,23 @@ namespace NLMBaseGUI.ViewModels
             this.ShowMessageBox = new Interaction<string, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
-            this.MakeNoisyCommand = ReactiveCommand.Create(this.MakeNoisy);
+            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAny(x => x.RawImage, x => x != null));
             this.LoadNoisyCommand = ReactiveCommand.Create(this.LoadNoisy);
-            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy);
-            this.MakeFilteredCommand = ReactiveCommand.Create(this.MakeFiltered);
-            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered);
+            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAny(x => x.NoisyImage, x => x != null));
+            this.MakeFilteredCommand = ReactiveCommand.Create(this.MakeFiltered, this.WhenAny(x => x.NoisyImage, x => x != null));
+            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAny(x => x.FilteredImage, x => x != null));
+        }
+
+        private bool IsProcessing
+        {
+            get => this.isProcessing;
+            set => this.RaiseAndSetIfChanged(ref this.isProcessing, value);
+        }
+
+        private int SelectedTab
+        {
+            get => this.selectedTab;
+            set => this.RaiseAndSetIfChanged(ref this.selectedTab, value);
         }
 
         public Bitmap RawImage
@@ -163,16 +177,22 @@ namespace NLMBaseGUI.ViewModels
             }
         }
 
-        private void MakeNoisy()
+        private async Task MakeNoisy()
         {
             try
             {
-                var noisyBitmap = this.noiseService.MakeNoisy(this.rawImage, this.sigma);
+                this.IsProcessing = true;
+                var noisyBitmap = await Task.Run(() => this.noiseService.MakeNoisy(this.rawImage, this.sigma));
                 this.NoisyImage = noisyBitmap;
+                this.SelectedTab = 1;
             }
             catch
             {
                 this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
+            finally
+            {
+                this.IsProcessing = false;
             }
         }
 

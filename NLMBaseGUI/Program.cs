@@ -1,11 +1,13 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.ReactiveUI;
-using System;
-
 namespace NLMBaseGUI
 {
-    class Program
+    using System;
+    using Avalonia;
+    using Avalonia.Controls.ApplicationLifetimes;
+    using Avalonia.ReactiveUI;
+    using Projektanker.Icons.Avalonia;
+    using Projektanker.Icons.Avalonia.FontAwesome;
+
+    public class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -16,8 +18,16 @@ namespace NLMBaseGUI
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
+                .AfterSetup(AfterSetupCallback)
                 .UsePlatformDetect()
                 .LogToTrace()
                 .UseReactiveUI();
+
+        // Called after setup
+        private static void AfterSetupCallback(AppBuilder appBuilder)
+        {
+            // Register icon provider(s)
+            IconProvider.Register<FontAwesomeIconProvider>();
+        }
     }
 }

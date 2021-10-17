@@ -6,6 +6,7 @@
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:rxui="http://reactiveui.net"
+					 xmlns:i="clr-namespace:Projektanker.Icons.Avalonia;assembly=Projektanker.Icons.Avalonia"
                      mc:Ignorable="d"
                      x:Class="NLMBaseGUI.Views.MainWindow"
                      x:TypeArguments="vm:MainWindowViewModel"
@@ -46,30 +47,37 @@
             <Setter Property="Margin" Value="4"/>
         </Style>
     </Window.Styles>
-    <StackPanel Orientation="Vertical">
-        <TabControl Classes="Margin">
-                <TabItem Header="Czysty" VerticalContentAlignment="Center">
-                    <StackPanel>
-                        <Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNotNull}}">
-                            <Image Classes="PreviewImage" Source="{Binding RawImage, Converter={StaticResource imageConverter}}"/>
-                        </Border>
-                        <Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNull}}">
-                            <StackPanel>
-                                <Border Classes="ImagePlaceholder">
-                                    <TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                        <Border Classes="Frame">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Classes="Margin" Command="{Binding LoadRawCommand}" Content="Wczytaj"/>
-                                <Button Classes="Margin" Command="{Binding MakeNoisyCommand}" Content="Dodaj szum"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Zaszumiony" VerticalContentAlignment="Center">
-                    <StackPanel Orientation="Vertical">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
+			<TabControl Classes="Margin" SelectedIndex="{Binding SelectedTab}">
+				<TabItem Header="Czysty" VerticalContentAlignment="Center">
+					<StackPanel>
+						<Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNotNull}}">
+							<Image Classes="PreviewImage" Source="{Binding RawImage, Converter={StaticResource imageConverter}}"/>
+						</Border>
+						<Border Classes="Frame" IsVisible="{Binding RawImage, Converter={x:Static ObjectConverters.IsNull}}">
+							<StackPanel>
+								<Border Classes="ImagePlaceholder">
+									<TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+								</Border>
+							</StackPanel>
+						</Border>
+						<Border Classes="Frame">
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+								<Button Classes="Margin" Command="{Binding LoadRawCommand}" Content="Wczytaj"/>
+								<Button Classes="Margin" Command="{Binding MakeNoisyCommand}" Content="Dodaj szum"/>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</TabItem>
+				<TabItem Header="Zaszumiony" VerticalContentAlignment="Center">
+					<StackPanel Orientation="Vertical">
 						<Border Classes="Frame" IsVisible="{Binding NoisyImage, Converter={x:Static ObjectConverters.IsNotNull}}">
 							<Image Classes="PreviewImage" Source="{Binding NoisyImage, Converter={StaticResource imageConverter}}"/>
 						</Border>
@@ -80,17 +88,17 @@
 								</Border>
 							</StackPanel>
 						</Border>
-                        <Border Classes="Frame">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
-                                <Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
-                                <Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
-                    <StackPanel Orientation="Vertical">
+						<Border Classes="Frame">
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+								<Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
+								<Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
+								<Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</TabItem>
+				<TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
+					<StackPanel Orientation="Vertical">
 						<Border Classes="Frame" IsVisible="{Binding FilteredImage, Converter={x:Static ObjectConverters.IsNotNull}}">
 							<Image Classes="PreviewImage" Source="{Binding FilteredImage, Converter={StaticResource imageConverter}}"/>
 						</Border>
@@ -101,30 +109,37 @@
 								</Border>
 							</StackPanel>
 						</Border>
-                        <Border Classes="Frame">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
-                                <Button Classes="Margin" Content="Pokaż statystyki"/><!-- To załatwić w widoku samym może? -->
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </TabItem>
-            </TabControl>
-        <Border Classes="Frame" Margin="24,4,24,4">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<StackPanel Orientation="Vertical">
-					<TextBlock Text="Sigma"/>
-					<TextBox Classes="Margin">
-						<Interaction.Behaviors>
-							<behav:LostFocusUpdateBindingBehavior Text="{Binding Sigma}"/>
-						</Interaction.Behaviors>
-					</TextBox>
+						<Border Classes="Frame">
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+								<Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
+								<Button Classes="Margin" Content="Pokaż statystyki"/>
+								<!-- To załatwić w widoku samym może? -->
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</TabItem>
+			</TabControl>
+			<Border Classes="Frame" Margin="24,4,24,4">
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+					<StackPanel Orientation="Vertical">
+						<TextBlock Text="Sigma"/>
+						<TextBox Classes="Margin">
+							<Interaction.Behaviors>
+								<behav:LostFocusUpdateBindingBehavior Text="{Binding Sigma}"/>
+							</Interaction.Behaviors>
+						</TextBox>
+					</StackPanel>
+					<StackPanel Orientation="Vertical">
+						<TextBlock Text="Implementacja"/>
+						<ComboBox Classes="Margin"/>
+					</StackPanel>
 				</StackPanel>
-				<StackPanel Orientation="Vertical">
-					<TextBlock Text="Implementacja"/>
-					<ComboBox Classes="Margin"/>
-				</StackPanel>
-            </StackPanel>
-        </Border>
-    </StackPanel>
+			</Border>
+		</StackPanel>
+		<DockPanel Grid.Column="0" Grid.Row="0">
+			<Border DockPanel.Dock="Top" IsVisible="{Binding IsProcessing}" Background="DarkGray" Opacity="0.3">
+				<i:Icon Value="fas fa-cog" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+			</Border>
+		</DockPanel>
+	</Grid>
 </rxui:ReactiveWindow>
