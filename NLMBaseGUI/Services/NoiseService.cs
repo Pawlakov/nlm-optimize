@@ -1,6 +1,5 @@
 ﻿namespace NLMBaseGUI.Services
 {
-    using MersenneTwister;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
@@ -10,6 +9,7 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using MersenneTwister;
 
     public class NoiseService
     {
@@ -36,11 +36,15 @@
             this.Noise(inputChannels, noisyChannels, sigma, channels, width, height);
 
             var noisy = new Bitmap(width, height, pixelFormat);
-            //var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
-            //var noisyOrigin = noisyData.Scan0;
+            /*
+            var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
+            var noisyOrigin = noisyData.Scan0;
+            */
             var noisyArray = WrapChannels(noisyChannels, channels, width, height, length, stride);
-            //Marshal.Copy(noisyArray, 0, noisyOrigin, this.length);
-            //noisy.UnlockBits(noisyData);
+            /*
+            Marshal.Copy(noisyArray, 0, noisyOrigin, this.length);
+            noisy.UnlockBits(noisyData);
+            */
             this.WriteBitemapTheDumbWay(noisy, noisyArray, channels, width, height, stride);
 
             return noisy;

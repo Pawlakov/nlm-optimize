@@ -1,12 +1,13 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
-using NLMBaseGUI.ViewModels;
-using NLMBaseGUI.Views;
-
 namespace NLMBaseGUI
 {
-    public class App : Application
+    using Avalonia;
+    using Avalonia.Controls.ApplicationLifetimes;
+    using Avalonia.Markup.Xaml;
+    using NLMBaseGUI.ViewModels;
+    using NLMBaseGUI.Views;
+
+    public class App
+        : Application
     {
         public override void Initialize()
         {
@@ -15,7 +16,7 @@ namespace NLMBaseGUI
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow
                 {

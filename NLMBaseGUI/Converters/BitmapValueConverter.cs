@@ -1,25 +1,18 @@
-﻿using Avalonia;
-using Avalonia.Data.Converters;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NLMBaseGUI.Converters
+﻿namespace NLMBaseGUI.Converters
 {
-    public class BitmapValueConverter : IValueConverter
-    {
-        public static BitmapValueConverter Instance = new BitmapValueConverter();
+    using System;
+    using System.Drawing.Imaging;
+    using System.Globalization;
+    using System.IO;
+    using Avalonia.Data.Converters;
+    using Avalonia.Media.Imaging;
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public class BitmapValueConverter
+        : IValueConverter
+    {
+        public static BitmapValueConverter Instance { get; } = new BitmapValueConverter();
+
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value == null)
             {
@@ -41,7 +34,7 @@ namespace NLMBaseGUI.Converters
             throw new NotSupportedException();
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
         }

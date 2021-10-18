@@ -3,6 +3,13 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />

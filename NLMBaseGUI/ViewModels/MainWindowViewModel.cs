@@ -7,6 +7,7 @@ namespace NLMBaseGUI.ViewModels
     using System.Drawing.Imaging;
     using System.IO;
     using System.Reactive;
+    using System.Reactive.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading.Tasks;
@@ -17,17 +18,19 @@ namespace NLMBaseGUI.ViewModels
     public class MainWindowViewModel : ViewModelBase
     {
         private readonly NoiseService noiseService;
+        private readonly FilterService filterService;
 
         private bool isProcessing;
         private int selectedTab;
-        private Bitmap rawImage;
-        private Bitmap noisyImage;
-        private Bitmap filteredImage;
+        private Bitmap? rawImage;
+        private Bitmap? noisyImage;
+        private Bitmap? filteredImage;
         private int sigma;
 
         public MainWindowViewModel()
         {
             this.noiseService = new NoiseService();
+            this.filterService = new FilterService();
 
             /*
             var input = new Bitmap(@"C:\Users\pmatu\Desktop\flasz.png");
@@ -55,38 +58,38 @@ namespace NLMBaseGUI.ViewModels
             this.ShowMessageBox = new Interaction<string, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
-            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAny(x => x.RawImage, x => x != null));
+            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAnyValue(x => x.RawImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadNoisyCommand = ReactiveCommand.Create(this.LoadNoisy);
-            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAny(x => x.NoisyImage, x => x != null));
-            this.MakeFilteredCommand = ReactiveCommand.Create(this.MakeFiltered, this.WhenAny(x => x.NoisyImage, x => x != null));
-            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAny(x => x.FilteredImage, x => x != null));
+            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
         }
 
-        private bool IsProcessing
+        public bool IsProcessing
         {
             get => this.isProcessing;
             set => this.RaiseAndSetIfChanged(ref this.isProcessing, value);
         }
 
-        private int SelectedTab
+        public int SelectedTab
         {
             get => this.selectedTab;
             set => this.RaiseAndSetIfChanged(ref this.selectedTab, value);
         }
 
-        public Bitmap RawImage
+        public Bitmap? RawImage
         {
             get => this.rawImage;
             set => this.RaiseAndSetIfChanged(ref this.rawImage, value);
         }
 
-        public Bitmap NoisyImage
+        public Bitmap? NoisyImage
         {
             get => this.noisyImage;
             set => this.RaiseAndSetIfChanged(ref this.noisyImage, value);
         }
 
-        public Bitmap FilteredImage
+        public Bitmap? FilteredImage
         {
             get => this.filteredImage;
             set => this.RaiseAndSetIfChanged(ref this.filteredImage, value);
@@ -182,9 +185,12 @@ namespace NLMBaseGUI.ViewModels
             try
             {
                 this.IsProcessing = true;
-                var noisyBitmap = await Task.Run(() => this.noiseService.MakeNoisy(this.rawImage, this.sigma));
-                this.NoisyImage = noisyBitmap;
-                this.SelectedTab = 1;
+                if (this.rawImage != null)
+                {
+                    var noisyBitmap = await Task.Run(() => this.noiseService.MakeNoisy(this.rawImage, this.sigma));
+                    this.NoisyImage = noisyBitmap;
+                    this.SelectedTab = 1;
+                }
             }
             catch
             {
@@ -243,31 +249,34 @@ namespace NLMBaseGUI.ViewModels
         {
             try
             {
-                this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
-                    x =>
-                    {
-                        try
+                if (this.noisyImage != null)
+                {
+                    this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
+                        x =>
                         {
-                            this.NoisyImage.Save(x);
-                        }
-                        catch
+                            try
+                            {
+                                this.noisyImage.Save(x);
+                            }
+                            catch
+                            {
+                                Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                }).Wait();
+                            }
+                        },
+                        x =>
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
                                 this.ShowMessageBox.Handle("B³¹d!").Subscribe();
                             }).Wait();
-                        }
-                    },
-                    x =>
-                    {
-                        Dispatcher.UIThread.InvokeAsync(() =>
+                        },
+                        () =>
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
-                        }).Wait();
-                    },
-                    () =>
-                    {
-                    });
+                        });
+                }
             }
             catch
             {
@@ -275,14 +284,25 @@ namespace NLMBaseGUI.ViewModels
             }
         }
 
-        private void MakeFiltered()
+        private async Task MakeFiltered()
         {
             try
             {
+                this.IsProcessing = true;
+                if (this.noisyImage != null)
+                {
+                    var filteredBitmap = await Task.Run(() => this.filterService.MakeFiltered(this.noisyImage, this.sigma));
+                    this.FilteredImage = filteredBitmap;
+                    this.SelectedTab = 2;
+                }
             }
             catch
             {
                 this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
+            finally
+            {
+                this.IsProcessing = false;
             }
         }
 
@@ -290,31 +310,34 @@ namespace NLMBaseGUI.ViewModels
         {
             try
             {
-                this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
-                    x =>
-                    {
-                        try
+                if (this.filteredImage != null)
+                {
+                    this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
+                        x =>
                         {
-                            this.FilteredImage.Save(x);
-                        }
-                        catch
+                            try
+                            {
+                                this.filteredImage.Save(x);
+                            }
+                            catch
+                            {
+                                Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                }).Wait();
+                            }
+                        },
+                        x =>
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
                                 this.ShowMessageBox.Handle("B³¹d!").Subscribe();
                             }).Wait();
-                        }
-                    },
-                    x =>
-                    {
-                        Dispatcher.UIThread.InvokeAsync(() =>
+                        },
+                        () =>
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
-                        }).Wait();
-                    },
-                    () =>
-                    {
-                    });
+                        });
+                }
             }
             catch
             {

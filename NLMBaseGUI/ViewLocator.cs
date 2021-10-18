@@ -1,11 +1,12 @@
-using Avalonia.Controls;
-using Avalonia.Controls.Templates;
-using NLMBaseGUI.ViewModels;
-using System;
-
 namespace NLMBaseGUI
 {
-    public class ViewLocator : IDataTemplate
+    using System;
+    using Avalonia.Controls;
+    using Avalonia.Controls.Templates;
+    using NLMBaseGUI.ViewModels;
+
+    public class ViewLocator 
+        : IDataTemplate
     {
         public bool SupportsRecycling => false;
 
@@ -16,7 +17,7 @@ namespace NLMBaseGUI
 
             if (type != null)
             {
-                return (Control)Activator.CreateInstance(type)!;
+                return (Control)Activator.CreateInstance(type) !;
             }
             else
             {

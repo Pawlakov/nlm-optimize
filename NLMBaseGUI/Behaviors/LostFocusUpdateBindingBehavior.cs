@@ -14,6 +14,8 @@
     public class LostFocusUpdateBindingBehavior 
         : Behavior<TextBox>
     {
+        public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<LostFocusUpdateBindingBehavior, string>("Text", defaultBindingMode: BindingMode.TwoWay);
+
         static LostFocusUpdateBindingBehavior()
         {
             TextProperty.Changed.Subscribe(e =>
@@ -21,8 +23,6 @@
                 ((LostFocusUpdateBindingBehavior)e.Sender).OnBindingValueChanged();
             });
         }
-
-        public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<LostFocusUpdateBindingBehavior, string>("Text", defaultBindingMode: BindingMode.TwoWay);
 
         public string Text
         {
@@ -32,13 +32,13 @@
 
         protected override void OnAttached()
         {
-            this.AssociatedObject.LostFocus += this.OnLostFocus;
+            this.AssociatedObject!.LostFocus += this.OnLostFocus;
             base.OnAttached();
         }
 
         protected override void OnDetaching()
         {
-            this.AssociatedObject.LostFocus -= this.OnLostFocus;
+            this.AssociatedObject!.LostFocus -= this.OnLostFocus;
             base.OnDetaching();
         }
 

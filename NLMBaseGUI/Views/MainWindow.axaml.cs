@@ -24,9 +24,9 @@ namespace NLMBaseGUI.Views
 #endif
             this.WhenActivated(d =>
             {
-                d(this.ViewModel.ShowOpenFileDialog.RegisterHandler(this.ShowOpenFileDialog));
-                d(this.ViewModel.ShowSaveFileDialog.RegisterHandler(this.ShowSaveFileDialog));
-                d(this.ViewModel.ShowMessageBox.RegisterHandler(this.ShowMessageBox));
+                d(this.ViewModel!.ShowOpenFileDialog.RegisterHandler(this.ShowOpenFileDialog));
+                d(this.ViewModel!.ShowSaveFileDialog.RegisterHandler(this.ShowSaveFileDialog));
+                d(this.ViewModel!.ShowMessageBox.RegisterHandler(this.ShowMessageBox));
             });
         }
 
