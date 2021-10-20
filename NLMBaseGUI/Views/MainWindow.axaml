@@ -11,6 +11,7 @@
                      x:Class="NLMBaseGUI.Views.MainWindow"
                      x:TypeArguments="vm:MainWindowViewModel"
                      Icon="/Assets/avalonia-logo.ico"
+					 SizeToContent="WidthAndHeight"
                      Title="NLMBaseGUI">
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -112,10 +113,24 @@
                         <Border Classes="Frame">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
-                                <Button Classes="Margin" Content="Pokaż statystyki"/>
-                                <!-- To załatwić w widoku samym może? -->
                             </StackPanel>
                         </Border>
+						<Border Classes="Frame" IsVisible="{Binding FilteringStats, Converter={x:Static ObjectConverters.IsNotNull}}">
+							<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+								<StackPanel Orientation="Horizontal">
+									<TextBlock Text="Czas wykonania: "/>
+									<TextBlock Text="{Binding FilteringStats.Time}"/>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" IsVisible="{Binding FilteringStats.MSE, Converter={x:Static ObjectConverters.IsNotNull}}">
+									<TextBlock Text="MSE: "/>
+									<TextBlock Text="{Binding FilteringStats.MSE}"/>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" IsVisible="{Binding FilteringStats.SSIM, Converter={x:Static ObjectConverters.IsNotNull}}">
+									<TextBlock Text="SSIM: "/>
+									<TextBlock Text="{Binding FilteringStats.SSIM}"/>
+								</StackPanel>
+							</StackPanel>
+						</Border>
                     </StackPanel>
                 </TabItem>
             </TabControl>

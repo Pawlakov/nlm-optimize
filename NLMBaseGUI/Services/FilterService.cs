@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Linq;
@@ -9,6 +10,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using NLMBaseGUI.Helpers;
+    using NLMBaseGUI.Models;
     using NLMBaseGUI.NLM;
 
     public unsafe class FilterService
@@ -20,7 +22,7 @@
             this.library = new DefaultImplementation();
         }
 
-        public Bitmap MakeFiltered(Bitmap noisy, int sigma)
+        public (Bitmap, FilteringStatsModel) MakeFiltered(Bitmap noisy, int sigma)
         {
             var width = Math.Min(noisy.Width, noisy.Width);
             var height = Math.Min(noisy.Height, noisy.Height);
@@ -40,13 +42,21 @@
             var noisyChannels = BitmapHelpers.UnwrapChannels(noisyArray, channels, width, height, stride);
 
             var filteredChannels = BitmapHelpers.MakeEmptyChannels(channels, width, height);
+
+            var watch = Stopwatch.StartNew();
             this.Denoise(noisyChannels, filteredChannels, sigma, channels, width, height);
+            watch.Stop();
 
             var filtered = new Bitmap(width, height, pixelFormat);
             var filteredArray = BitmapHelpers.WrapChannels(filteredChannels, channels, width, height, length, stride);
             BitmapHelpers.WriteBitemapTheDumbWay(filtered, filteredArray, channels, width, height, stride);
 
-            return filtered;
+            var stats = new FilteringStatsModel
+            {
+                Time = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds),
+            };
+
+            return (filtered, stats);
         }
 
         private void Denoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)

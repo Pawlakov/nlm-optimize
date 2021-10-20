@@ -12,6 +12,7 @@ namespace NLMBaseGUI.ViewModels
     using System.Text;
     using System.Threading.Tasks;
     using Avalonia.Threading;
+    using NLMBaseGUI.Models;
     using NLMBaseGUI.Services;
     using ReactiveUI;
 
@@ -26,32 +27,12 @@ namespace NLMBaseGUI.ViewModels
         private Bitmap? noisyImage;
         private Bitmap? filteredImage;
         private int sigma;
+        private FilteringStatsModel? filteringStats;
 
         public MainWindowViewModel()
         {
             this.noiseService = new NoiseService();
             this.filterService = new FilterService();
-
-            /*
-            var input = new Bitmap(@"C:\Users\pmatu\Desktop\flasz.png");
-
-            var width = Math.Min(input.Width, input.Width);
-            var height = Math.Min(input.Height, input.Height);
-            var inputData = input.LockBits(
-                new Rectangle(0, 0, input.Width, input.Height),
-                ImageLockMode.ReadOnly,
-                input.PixelFormat);
-            var stride = inputData.Stride;
-            var pixelFormat = inputData.PixelFormat;
-            var channels = Image.GetPixelFormatSize(pixelFormat) / 8;
-            var inputOrigin = inputData.Scan0;
-            var length = Math.Abs(inputData.Stride) * inputData.Height;
-            this.rawImage = new byte[length];
-            Marshal.Copy(inputOrigin, this.rawImage, 0, length);
-            input.UnlockBits(inputData);
-            */
-
-            /*this.rawImage = File.ReadAllBytes(@"/home/pawlakov/Pulpit/ani uwu.jpg");*/
 
             this.ShowOpenFileDialog = new Interaction<Unit, string?>();
             this.ShowSaveFileDialog = new Interaction<Unit, string?>();
@@ -117,6 +98,12 @@ namespace NLMBaseGUI.ViewModels
                 Debug.WriteLine(this.sigma);
                 this.RaisePropertyChanged();
             }
+        }
+
+        public FilteringStatsModel? FilteringStats 
+        {
+            get => this.filteringStats;
+            set => this.RaiseAndSetIfChanged(ref this.filteringStats, value);
         }
 
         public Interaction<Unit, string?> ShowOpenFileDialog { get; }
@@ -291,8 +278,9 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.noisyImage != null)
                 {
-                    var filteredBitmap = await Task.Run(() => this.filterService.MakeFiltered(this.noisyImage, this.sigma));
+                    (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.noisyImage, this.sigma));
                     this.FilteredImage = filteredBitmap;
+                    this.FilteringStats = filteringStats;
                     this.SelectedTab = 2;
                 }
             }
