@@ -27,6 +27,7 @@ namespace NLMBaseGUI.ViewModels
         private Bitmap? noisyImage;
         private Bitmap? filteredImage;
         private int sigma;
+        private FilteringStatsModel? noisingStats;
         private FilteringStatsModel? filteringStats;
 
         public MainWindowViewModel()
@@ -98,6 +99,12 @@ namespace NLMBaseGUI.ViewModels
                 Debug.WriteLine(this.sigma);
                 this.RaisePropertyChanged();
             }
+        }
+
+        public FilteringStatsModel? NoisingStats
+        {
+            get => this.noisingStats;
+            set => this.RaiseAndSetIfChanged(ref this.noisingStats, value);
         }
 
         public FilteringStatsModel? FilteringStats 
@@ -174,8 +181,9 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.rawImage != null)
                 {
-                    var noisyBitmap = await Task.Run(() => this.noiseService.MakeNoisy(this.rawImage, this.sigma));
+                    (var noisyBitmap, var noisingStats) = await Task.Run(() => this.noiseService.MakeNoisy(this.rawImage, this.sigma));
                     this.NoisyImage = noisyBitmap;
+                    this.NoisingStats = noisingStats;
                     this.SelectedTab = 1;
                 }
             }
@@ -278,7 +286,7 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.noisyImage != null)
                 {
-                    (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.noisyImage, this.sigma));
+                    (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.rawImage, this.noisyImage, this.sigma));
                     this.FilteredImage = filteredBitmap;
                     this.FilteringStats = filteringStats;
                     this.SelectedTab = 2;

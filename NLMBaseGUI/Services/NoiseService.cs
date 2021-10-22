@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Linq;
@@ -11,10 +12,11 @@
     using System.Threading.Tasks;
     using MersenneTwister;
     using NLMBaseGUI.Helpers;
+    using NLMBaseGUI.Models;
 
     public class NoiseService
     {
-        public Bitmap MakeNoisy(Bitmap input, int sigma)
+        public (Bitmap, FilteringStatsModel) MakeNoisy(Bitmap input, int sigma)
         {
             var width = Math.Min(input.Width, input.Width);
             var height = Math.Min(input.Height, input.Height);
@@ -32,23 +34,44 @@
             input.UnlockBits(inputData);
 
             var inputChannels = BitmapHelpers.UnwrapChannels(inputArray, channels, width, height, stride);
-
             var noisyChannels = BitmapHelpers.MakeEmptyChannels(channels, width, height);
+
+            var watch = Stopwatch.StartNew();
             this.Noise(inputChannels, noisyChannels, sigma, channels, width, height);
+            watch.Stop();
 
             var noisy = new Bitmap(width, height, pixelFormat);
-            /*
-            var noisyData = noisy.LockBits(new Rectangle(0, 0, this.width, this.height), ImageLockMode.ReadOnly, noisy.PixelFormat);
-            var noisyOrigin = noisyData.Scan0;
-            */
             var noisyArray = BitmapHelpers.WrapChannels(noisyChannels, channels, width, height, length, stride);
-            /*
-            Marshal.Copy(noisyArray, 0, noisyOrigin, this.length);
-            noisy.UnlockBits(noisyData);
-            */
             BitmapHelpers.WriteBitemapTheDumbWay(noisy, noisyArray, channels, width, height, stride);
 
-            return noisy;
+            float? mseNoisy;
+            try
+            {
+                mseNoisy = BitmapHelpers.CalculateMSE(inputArray, noisyArray, width, height, channels);
+            }
+            catch
+            {
+                mseNoisy = null;
+            }
+
+            float? ssimNoisy;
+            try
+            {
+                ssimNoisy = BitmapHelpers.CalculateSSIM(inputArray, noisyArray, width, height, channels);
+            }
+            catch
+            {
+                ssimNoisy = null;
+            }
+
+            var stats = new FilteringStatsModel
+            {
+                Time = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds),
+                MSE = mseNoisy,
+                SSIM = ssimNoisy,
+            };
+
+            return (noisy, stats);
         }
 
         private void Noise(float[] inputPointer, float[] outputPointer, int sigma, int channels, int width, int height)

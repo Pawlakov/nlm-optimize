@@ -89,13 +89,29 @@
                                 </Border>
                             </StackPanel>
                         </Border>
-                        <Border Classes="Frame">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
-                                <Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
-                                <Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
-                            </StackPanel>
-                        </Border>
+						<Border Classes="Frame" IsVisible="{Binding NoisingStats, Converter={x:Static ObjectConverters.IsNotNull}}">
+							<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+								<StackPanel Orientation="Horizontal">
+									<TextBlock Text="Czas wykonania: "/>
+									<TextBlock Text="{Binding NoisingStats.Time}"/>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" IsVisible="{Binding NoisingStats.MSE, Converter={x:Static ObjectConverters.IsNotNull}}">
+									<TextBlock Text="MSE: "/>
+									<TextBlock Text="{Binding NoisingStats.MSE}"/>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" IsVisible="{Binding NoisingStats.SSIM, Converter={x:Static ObjectConverters.IsNotNull}}">
+									<TextBlock Text="SSIM: "/>
+									<TextBlock Text="{Binding NoisingStats.SSIM}"/>
+								</StackPanel>
+							</StackPanel>
+						</Border>
+						<Border Classes="Frame">
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+								<Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
+								<Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
+								<Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
+							</StackPanel>
+						</Border>
                     </StackPanel>
                 </TabItem>
                 <TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
@@ -108,11 +124,6 @@
                                 <Border Classes="ImagePlaceholder">
                                     <TextBlock Text="Brak obrazu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Border>
-                            </StackPanel>
-                        </Border>
-                        <Border Classes="Frame">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
                             </StackPanel>
                         </Border>
 						<Border Classes="Frame" IsVisible="{Binding FilteringStats, Converter={x:Static ObjectConverters.IsNotNull}}">
@@ -129,6 +140,11 @@
 									<TextBlock Text="SSIM: "/>
 									<TextBlock Text="{Binding FilteringStats.SSIM}"/>
 								</StackPanel>
+							</StackPanel>
+						</Border>
+						<Border Classes="Frame">
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+								<Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
 							</StackPanel>
 						</Border>
                     </StackPanel>

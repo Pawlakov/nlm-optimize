@@ -22,7 +22,7 @@
             this.library = new DefaultImplementation();
         }
 
-        public (Bitmap, FilteringStatsModel) MakeFiltered(Bitmap noisy, int sigma)
+        public (Bitmap, FilteringStatsModel) MakeFiltered(Bitmap? raw, Bitmap noisy, int sigma)
         {
             var width = Math.Min(noisy.Width, noisy.Width);
             var height = Math.Min(noisy.Height, noisy.Height);
@@ -40,7 +40,6 @@
             noisy.UnlockBits(noisyData);
 
             var noisyChannels = BitmapHelpers.UnwrapChannels(noisyArray, channels, width, height, stride);
-
             var filteredChannels = BitmapHelpers.MakeEmptyChannels(channels, width, height);
 
             var watch = Stopwatch.StartNew();
@@ -51,9 +50,52 @@
             var filteredArray = BitmapHelpers.WrapChannels(filteredChannels, channels, width, height, length, stride);
             BitmapHelpers.WriteBitemapTheDumbWay(filtered, filteredArray, channels, width, height, stride);
 
+            var mseResult = (float?)null;
+            var ssimResult = (float?)null;
+
+            if (raw != null)
+            {
+                var rawWidth = Math.Min(raw.Width, raw.Width);
+                var rawHeight = Math.Min(raw.Height, raw.Height);
+                var rawData = raw.LockBits(
+                    new Rectangle(0, 0, raw.Width, raw.Height),
+                    ImageLockMode.ReadOnly,
+                    raw.PixelFormat);
+                var rawPixelFormat = rawData.PixelFormat;
+                var rawChannels = Image.GetPixelFormatSize(rawPixelFormat) / 8;
+                var rawOrigin = rawData.Scan0;
+                var rawLength = Math.Abs(rawData.Stride) * rawData.Height;
+                var rawArray = new byte[rawLength];
+                Marshal.Copy(rawOrigin, rawArray, 0, rawLength);
+                raw.UnlockBits(rawData);
+
+                if (width == rawWidth && height == rawHeight && channels == rawChannels)
+                {
+                    try
+                    {
+                        mseResult = BitmapHelpers.CalculateMSE(rawArray, filteredArray, width, height, channels);
+                    }
+                    catch
+                    {
+                        mseResult = null;
+                    }
+
+                    try
+                    {
+                        ssimResult = BitmapHelpers.CalculateSSIM(rawArray, filteredArray, width, height, channels);
+                    }
+                    catch
+                    {
+                        ssimResult = null;
+                    }
+                }
+            }
+
             var stats = new FilteringStatsModel
             {
                 Time = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds),
+                MSE = mseResult,
+                SSIM = ssimResult,
             };
 
             return (filtered, stats);
