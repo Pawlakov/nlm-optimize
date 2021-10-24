@@ -20,7 +20,7 @@ namespace NLMBaseGUI.NLM
         // fpI      Input
         // fpO      Output
 
-        public string Name => "Domyœlna";
+        public string Name => "DomyÅ›lna";
 
         public DenoiseFunction Denoise => DenoiseBody;
 

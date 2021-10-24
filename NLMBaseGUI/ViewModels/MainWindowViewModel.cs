@@ -11,6 +11,7 @@ namespace NLMBaseGUI.ViewModels
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading.Tasks;
+    using Avalonia.Collections;
     using Avalonia.Threading;
     using NLMBaseGUI.Models;
     using NLMBaseGUI.NLM;
@@ -31,7 +32,6 @@ namespace NLMBaseGUI.ViewModels
         private IImplementation implementation;
         private FilteringStatsModel? noisingStats;
         private FilteringStatsModel? filteringStats;
-        private List<IImplementation> implementationOptions;
 
         public MainWindowViewModel()
         {
@@ -40,7 +40,7 @@ namespace NLMBaseGUI.ViewModels
 
             var defaultImplementation = new DefaultImplementation();
             this.implementation = defaultImplementation;
-            this.implementationOptions = new List<IImplementation> { defaultImplementation, };
+            this.ImplementationOptions = new AvaloniaList<IImplementation> { defaultImplementation, };
 
             this.ShowOpenLibraryDialog = new Interaction<Unit, string[]?>();
             this.ShowOpenImageDialog = new Interaction<Unit, string?>();
@@ -127,7 +127,7 @@ namespace NLMBaseGUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref this.filteringStats, value);
         }
 
-        public List<IImplementation> ImplementationOptions => this.implementationOptions;
+        public AvaloniaList<IImplementation> ImplementationOptions { get; }
 
         public Interaction<Unit, string[]?> ShowOpenLibraryDialog { get; }
 
@@ -173,7 +173,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                             }).Wait();
                         }
                     },
@@ -181,7 +181,7 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                         }).Wait();
                     },
                     () =>
@@ -190,7 +190,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
         }
 
@@ -209,7 +209,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
             finally
             {
@@ -239,7 +239,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                             }).Wait();
                         }
                     },
@@ -247,7 +247,7 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                         }).Wait();
                     },
                     () =>
@@ -256,7 +256,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
         }
 
@@ -277,7 +277,7 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>
                                 {
-                                    this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                    this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                                 }).Wait();
                             }
                         },
@@ -285,7 +285,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                             }).Wait();
                         },
                         () =>
@@ -295,7 +295,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
         }
 
@@ -314,7 +314,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
             finally
             {
@@ -339,7 +339,7 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>
                                 {
-                                    this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                    this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                                 }).Wait();
                             }
                         },
@@ -347,7 +347,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                             }).Wait();
                         },
                         () =>
@@ -357,7 +357,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
         }
 
@@ -377,10 +377,10 @@ namespace NLMBaseGUI.ViewModels
                                     var file = new FileInfo(libraryName);
                                     if (file.Exists)
                                     {
-                                        this.implementationOptions.Add(new ExternalImplementation(file));
+                                        var implementation = new ExternalImplementation(file);
+                                        this.ImplementationOptions.Add(implementation);
+                                        this.Implementation = implementation;
                                     }
-
-                                    this.RaisePropertyChanged(nameof(this.ImplementationOptions));
                                 }
                             }
                         }
@@ -388,7 +388,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                             }).Wait();
                         }
                     },
@@ -396,7 +396,7 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
                         }).Wait();
                     },
                     () =>
@@ -405,7 +405,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch
             {
-                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                this.ShowMessageBox.Handle("Bï¿½ï¿½d!").Subscribe();
             }
         }
     }
