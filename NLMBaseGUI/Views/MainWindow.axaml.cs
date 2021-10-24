@@ -24,8 +24,9 @@ namespace NLMBaseGUI.Views
 #endif
             this.WhenActivated(d =>
             {
-                d(this.ViewModel!.ShowOpenFileDialog.RegisterHandler(this.ShowOpenFileDialog));
-                d(this.ViewModel!.ShowSaveFileDialog.RegisterHandler(this.ShowSaveFileDialog));
+                d(this.ViewModel!.ShowOpenLibraryDialog.RegisterHandler(this.ShowOpenLibraryDialog));
+                d(this.ViewModel!.ShowOpenImageDialog.RegisterHandler(this.ShowOpenImageDialog));
+                d(this.ViewModel!.ShowSaveImageDialog.RegisterHandler(this.ShowSaveImageDialog));
                 d(this.ViewModel!.ShowMessageBox.RegisterHandler(this.ShowMessageBox));
             });
         }
@@ -35,7 +36,30 @@ namespace NLMBaseGUI.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        private async Task ShowOpenFileDialog(InteractionContext<Unit, string?> interaction)
+        private async Task ShowOpenLibraryDialog(InteractionContext<Unit, string[]?> interaction)
+        {
+            var dialog = new OpenFileDialog
+            {
+                AllowMultiple = true,
+                Filters = new List<FileDialogFilter>
+                {
+                    new FileDialogFilter
+                    {
+                        Name = "Biblioteki",
+                        Extensions = new List<string>
+                        {
+                            "dll",
+                            "so",
+                        },
+                    },
+                },
+            };
+
+            var fileNames = await dialog.ShowAsync(this);
+            interaction.SetOutput(fileNames);
+        }
+
+        private async Task ShowOpenImageDialog(InteractionContext<Unit, string?> interaction)
         {
             var dialog = new OpenFileDialog
             {
@@ -60,7 +84,7 @@ namespace NLMBaseGUI.Views
             interaction.SetOutput(fileNames.FirstOrDefault());
         }
 
-        private async Task ShowSaveFileDialog(InteractionContext<Unit, string?> interaction)
+        private async Task ShowSaveImageDialog(InteractionContext<Unit, string?> interaction)
         {
             var dialog = new SaveFileDialog
             {

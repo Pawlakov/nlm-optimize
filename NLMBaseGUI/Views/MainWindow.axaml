@@ -162,7 +162,18 @@
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Implementacja"/>
-                        <ComboBox Classes="Margin"/>
+						<StackPanel Orientation="Horizontal">
+							<ComboBox Classes="Margin" 
+									  Items="{Binding ImplementationOptions}"
+									  SelectedItem="{Binding Implementation}">
+								<ComboBox.ItemTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Name}"/>
+									</DataTemplate>
+								</ComboBox.ItemTemplate>
+							</ComboBox>
+							<Button Classes="Margin" Command="{Binding LoadImplementationCommand}" Content="Załaduj"/>
+						</StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>

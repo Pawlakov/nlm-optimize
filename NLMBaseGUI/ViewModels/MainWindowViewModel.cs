@@ -13,6 +13,7 @@ namespace NLMBaseGUI.ViewModels
     using System.Threading.Tasks;
     using Avalonia.Threading;
     using NLMBaseGUI.Models;
+    using NLMBaseGUI.NLM;
     using NLMBaseGUI.Services;
     using ReactiveUI;
 
@@ -27,16 +28,23 @@ namespace NLMBaseGUI.ViewModels
         private Bitmap? noisyImage;
         private Bitmap? filteredImage;
         private int sigma;
+        private IImplementation implementation;
         private FilteringStatsModel? noisingStats;
         private FilteringStatsModel? filteringStats;
+        private List<IImplementation> implementationOptions;
 
         public MainWindowViewModel()
         {
             this.noiseService = new NoiseService();
             this.filterService = new FilterService();
 
-            this.ShowOpenFileDialog = new Interaction<Unit, string?>();
-            this.ShowSaveFileDialog = new Interaction<Unit, string?>();
+            var defaultImplementation = new DefaultImplementation();
+            this.implementation = defaultImplementation;
+            this.implementationOptions = new List<IImplementation> { defaultImplementation, };
+
+            this.ShowOpenLibraryDialog = new Interaction<Unit, string[]?>();
+            this.ShowOpenImageDialog = new Interaction<Unit, string?>();
+            this.ShowSaveImageDialog = new Interaction<Unit, string?>();
             this.ShowMessageBox = new Interaction<string, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
@@ -45,6 +53,7 @@ namespace NLMBaseGUI.ViewModels
             this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.LoadImplementationCommand = ReactiveCommand.Create(this.LoadImplementation);
         }
 
         public bool IsProcessing
@@ -96,9 +105,14 @@ namespace NLMBaseGUI.ViewModels
                     this.sigma = parsed;
                 }
 
-                Debug.WriteLine(this.sigma);
                 this.RaisePropertyChanged();
             }
+        }
+
+        public IImplementation Implementation
+        {
+            get => this.implementation;
+            set => this.RaiseAndSetIfChanged(ref this.implementation, value);
         }
 
         public FilteringStatsModel? NoisingStats
@@ -113,9 +127,13 @@ namespace NLMBaseGUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref this.filteringStats, value);
         }
 
-        public Interaction<Unit, string?> ShowOpenFileDialog { get; }
+        public List<IImplementation> ImplementationOptions => this.implementationOptions;
 
-        public Interaction<Unit, string?> ShowSaveFileDialog { get; }
+        public Interaction<Unit, string[]?> ShowOpenLibraryDialog { get; }
+
+        public Interaction<Unit, string?> ShowOpenImageDialog { get; }
+
+        public Interaction<Unit, string?> ShowSaveImageDialog { get; }
 
         public Interaction<string, Unit> ShowMessageBox { get; }
 
@@ -131,11 +149,13 @@ namespace NLMBaseGUI.ViewModels
 
         public ReactiveCommand<Unit, Unit> SaveFilteredCommand { get; }
 
+        public ReactiveCommand<Unit, Unit> LoadImplementationCommand { get; }
+
         private void LoadRaw()
         {
             try
             {
-                this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(
+                this.ShowOpenImageDialog.Handle(Unit.Default).Subscribe(
                     x =>
                     {
                         try
@@ -201,7 +221,7 @@ namespace NLMBaseGUI.ViewModels
         {
             try
             {
-                this.ShowOpenFileDialog.Handle(Unit.Default).Subscribe(
+                this.ShowOpenImageDialog.Handle(Unit.Default).Subscribe(
                     x =>
                     {
                         try
@@ -246,7 +266,7 @@ namespace NLMBaseGUI.ViewModels
             {
                 if (this.noisyImage != null)
                 {
-                    this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
+                    this.ShowSaveImageDialog.Handle(Unit.Default).Subscribe(
                         x =>
                         {
                             try
@@ -286,7 +306,7 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.noisyImage != null)
                 {
-                    (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.rawImage, this.noisyImage, this.sigma));
+                    (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.implementation, this.rawImage, this.noisyImage, this.sigma));
                     this.FilteredImage = filteredBitmap;
                     this.FilteringStats = filteringStats;
                     this.SelectedTab = 2;
@@ -308,7 +328,7 @@ namespace NLMBaseGUI.ViewModels
             {
                 if (this.filteredImage != null)
                 {
-                    this.ShowSaveFileDialog.Handle(Unit.Default).Subscribe(
+                    this.ShowSaveImageDialog.Handle(Unit.Default).Subscribe(
                         x =>
                         {
                             try
@@ -334,6 +354,54 @@ namespace NLMBaseGUI.ViewModels
                         {
                         });
                 }
+            }
+            catch
+            {
+                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+            }
+        }
+
+        private void LoadImplementation()
+        {
+            try
+            {
+                this.ShowOpenLibraryDialog.Handle(Unit.Default).Subscribe(
+                    x => 
+                    {
+                        try
+                        {
+                            if (x != null)
+                            {
+                                foreach (var libraryName in x)
+                                {
+                                    var file = new FileInfo(libraryName);
+                                    if (file.Exists)
+                                    {
+                                        this.implementationOptions.Add(new ExternalImplementation(file));
+                                    }
+
+                                    this.RaisePropertyChanged(nameof(this.ImplementationOptions));
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                            }).Wait();
+                        }
+                    },
+                    x =>
+                    {
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            this.ShowMessageBox.Handle("B³¹d!").Subscribe();
+                        }).Wait();
+                    },
+                    () =>
+                    {
+                    });
             }
             catch
             {

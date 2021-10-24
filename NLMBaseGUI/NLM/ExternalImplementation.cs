@@ -11,23 +11,16 @@
 
         private IntPtr libraryHandle;
 
-        private ExternalImplementation(FileInfo libraryFile)
+        public ExternalImplementation(FileInfo libraryFile)
         {
+            this.Name = libraryFile.Name;
+
             this.libraryHandle = NativeLibrary.Load(libraryFile.FullName);
             var functionAddress = NativeLibrary.GetExport(this.libraryHandle, Symbol);
             this.Denoise = Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(DenoiseFunction)) as DenoiseFunction;
         }
 
-        public static IImplementation OpenImplementation(string libraryName)
-        {
-            var file = new FileInfo(libraryName);
-            if (!file.Exists)
-            {
-                throw new Exception("File not found.");
-            }
-
-            return new ExternalImplementation(file);
-        }
+        public string Name { get; }
 
         public DenoiseFunction Denoise { get; }
 

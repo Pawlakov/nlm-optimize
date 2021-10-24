@@ -15,14 +15,7 @@
 
     public unsafe class FilterService
     {
-        private IImplementation library;
-
-        public FilterService()
-        {
-            this.library = new DefaultImplementation();
-        }
-
-        public (Bitmap, FilteringStatsModel) MakeFiltered(Bitmap? raw, Bitmap noisy, int sigma)
+        public (Bitmap, FilteringStatsModel) MakeFiltered(IImplementation library, Bitmap? raw, Bitmap noisy, int sigma)
         {
             var width = Math.Min(noisy.Width, noisy.Width);
             var height = Math.Min(noisy.Height, noisy.Height);
@@ -43,7 +36,7 @@
             var filteredChannels = BitmapHelpers.MakeEmptyChannels(channels, width, height);
 
             var watch = Stopwatch.StartNew();
-            this.Denoise(noisyChannels, filteredChannels, sigma, channels, width, height);
+            this.Denoise(library, noisyChannels, filteredChannels, sigma, channels, width, height);
             watch.Stop();
 
             var filtered = new Bitmap(width, height, pixelFormat);
@@ -101,7 +94,7 @@
             return (filtered, stats);
         }
 
-        private void Denoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
+        private void Denoise(IImplementation library, float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
         {
             var win = 0;
             var bloc = 0;
@@ -181,7 +174,7 @@
 
                 fixed (float** inputPointer = &fpI[0], outputPointer = &fpO[0])
                 {
-                    this.library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, channels, width, height);
+                    library.Denoise(win, bloc, sigma, fFiltPar, inputPointer, outputPointer, channels, width, height);
                 }
             }
         }

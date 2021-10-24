@@ -19,6 +19,9 @@ namespace NLMBaseGUI.NLM
         // fFiltPar Filtering parameter
         // fpI      Input
         // fpO      Output
+
+        public string Name => "Domyœlna";
+
         public DenoiseFunction Denoise => DenoiseBody;
 
         public void Dispose()
