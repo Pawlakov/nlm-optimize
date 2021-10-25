@@ -54,6 +54,7 @@ namespace NLMBaseGUI.ViewModels
             this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadImplementationCommand = ReactiveCommand.Create(this.LoadImplementation);
+            this.CancelTaskCommand = ReactiveCommand.Create(this.CancelTask);
         }
 
         public bool IsProcessing
@@ -150,6 +151,8 @@ namespace NLMBaseGUI.ViewModels
         public ReactiveCommand<Unit, Unit> SaveFilteredCommand { get; }
 
         public ReactiveCommand<Unit, Unit> LoadImplementationCommand { get; }
+
+        public ReactiveCommand<Unit, Unit> CancelTaskCommand { get; }
 
         private void LoadRaw()
         {
@@ -407,6 +410,11 @@ namespace NLMBaseGUI.ViewModels
             {
                 this.ShowMessageBox.Handle("B��d!").Subscribe();
             }
+        }
+
+        private void CancelTask()
+        {
+
         }
     }
 }

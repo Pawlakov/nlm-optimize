@@ -178,10 +178,22 @@
                 </StackPanel>
             </Border>
         </StackPanel>
-        <DockPanel Grid.Column="0" Grid.Row="0">
-            <Border DockPanel.Dock="Top" IsVisible="{Binding IsProcessing}" Background="DarkGray" Opacity="0.3">
-                <i:Icon Value="fas fa-cog" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Border>
-        </DockPanel>
+		<Grid Grid.Column="0" Grid.Row="0" IsVisible="{Binding IsProcessing}">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition/>
+			</Grid.RowDefinitions>
+			<Border Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="3" DockPanel.Dock="Top" Background="DarkGray" Opacity="0.3">
+			</Border>
+			<Border Grid.Column="1" Grid.Row="1" Classes="Frame" Background="White">
+				<Button Classes="Margin" Command="{Binding CancelTaskCommand}" Content="Zatrzymaj"/>
+			</Border>
+		</Grid>
     </Grid>
 </rxui:ReactiveWindow>
