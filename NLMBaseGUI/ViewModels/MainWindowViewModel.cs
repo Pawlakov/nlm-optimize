@@ -32,6 +32,7 @@ namespace NLMBaseGUI.ViewModels
         private IImplementation implementation;
         private FilteringStatsModel? noisingStats;
         private FilteringStatsModel? filteringStats;
+        private ISession? currentSesstion;
 
         public MainWindowViewModel()
         {
@@ -54,7 +55,7 @@ namespace NLMBaseGUI.ViewModels
             this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadImplementationCommand = ReactiveCommand.Create(this.LoadImplementation);
-            this.CancelTaskCommand = ReactiveCommand.Create(this.CancelTask);
+            this.CancelTaskCommand = ReactiveCommand.Create(this.CancelTask, this.WhenAnyValue(x => x.CurrentSesstion, (ISession? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
         }
 
         public bool IsProcessing
@@ -126,6 +127,12 @@ namespace NLMBaseGUI.ViewModels
         {
             get => this.filteringStats;
             set => this.RaiseAndSetIfChanged(ref this.filteringStats, value);
+        }
+
+        public ISession? CurrentSesstion
+        {
+            get => this.currentSesstion;
+            set => this.RaiseAndSetIfChanged(ref this.currentSesstion, value);
         }
 
         public AvaloniaList<IImplementation> ImplementationOptions { get; }
@@ -309,18 +316,23 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.noisyImage != null)
                 {
+                    this.CurrentSesstion = this.filterService.SetUp();
+                    await this.CurrentSesstion.Run();
+                    /*
                     (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.implementation, this.rawImage, this.noisyImage, this.sigma));
                     this.FilteredImage = filteredBitmap;
                     this.FilteringStats = filteringStats;
                     this.SelectedTab = 2;
+                    */
                 }
             }
             catch
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowMessageBox.Handle("Błąd!").Subscribe();
             }
             finally
             {
+                this.CurrentSesstion = null;
                 this.IsProcessing = false;
             }
         }
@@ -414,7 +426,10 @@ namespace NLMBaseGUI.ViewModels
 
         private void CancelTask()
         {
-
+            if (this.CurrentSesstion != null)
+            {
+                this.CurrentSesstion.Cancel();
+            }
         }
     }
 }

@@ -94,6 +94,11 @@
             return (filtered, stats);
         }
 
+        public ISession SetUp()
+        {
+            return new ExternalSession(99, "jajco", "potassium");
+        }
+
         private void Denoise(IImplementation library, float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
         {
             var win = 0;
