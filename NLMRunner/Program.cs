@@ -3,6 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.Drawing;
+    using System.Drawing.Imaging;
     using System.IO;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -33,21 +34,26 @@
                 var implementationFile = string.IsNullOrWhiteSpace(config.LibraryPath) ? null : new FileInfo(config.LibraryPath);
                 using (var implementation = (IImplementation)(implementationFile != null ? new ExternalImplementation(implementationFile) : new DefaultImplementation()))
                 {
-                    var inputFile = new FileInfo(config.InputPath);
-                    var input = new Bitmap(inputFile.FullName);
+                    var input = (Bitmap)null;
+                    using (var inputFile = new MemoryStream(Convert.FromBase64String(config.InputFile)))
+                    {
+                        input = new Bitmap(inputFile);
+                    }
+
                     var inputModel = BitmapModel.Create(input);
                     var outputModel = BitmapModel.Create(inputModel.Width, inputModel.Height, inputModel.PixelFormat);
-                    inputFile.Delete();
 
                     var watch = Stopwatch.StartNew();
                     implementation.RunDenoise(inputModel.Data, outputModel.Data, config.Sigma, inputModel.Channels, inputModel.Width, inputModel.Height);
                     watch.Stop();
 
                     var output = outputModel.ToBitmap();
-                    var outputFile = new FileInfo(Path.GetTempFileName());
-                    output.Save(outputFile.FullName);
+                    using (var outputFile = new MemoryStream())
+                    {
+                        output.Save(outputFile, ImageFormat.Png);
+                        result.OutputFile = Convert.ToBase64String(outputFile.ToArray());
+                    }
 
-                    result.OutputPath = outputFile.FullName;
                     result.Time = watch.ElapsedMilliseconds;
                 }
             }

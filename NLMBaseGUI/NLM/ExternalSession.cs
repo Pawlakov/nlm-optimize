@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
+    using System.Drawing.Imaging;
     using System.IO;
     using System.IO.Pipes;
     using System.Linq;
@@ -36,7 +37,7 @@
 
             this.runnerProcess = new Process();
             this.runnerProcess.StartInfo.FileName = "NLMRunner.exe";
-            this.runnerProcess.StartInfo.UseShellExecute = true;
+            this.runnerProcess.StartInfo.UseShellExecute = false;
             this.runnerProcess.Start();
 
             var runResult = (RunResultDto?)null;
@@ -56,11 +57,13 @@
                 }
                 else
                 {
-                    var filteredFile = new FileInfo(runResult.OutputPath);
-                    var filtered = new Bitmap(filteredFile.FullName);
-                    filteredFile.Delete();
+                    var filtered = (Bitmap)null;
+                    using (var filteredFile = new MemoryStream(Convert.FromBase64String(runResult.OutputFile)))
+                    {
+                        filtered = new Bitmap(filteredFile);
+                    }
 
-                    var stats = this.CalculateStats(raw, this.input, filtered, runResult.Time);
+                    var stats = this.CalculateStats(raw, filtered, runResult.Time);
 
                     return (filtered, stats);
                 }
@@ -85,11 +88,13 @@
             {
                 Sigma = this.sigma,
                 LibraryPath = this.libraryPath,
-                InputPath = Path.GetTempFileName(),
             };
 
-            var file = new FileInfo(config.InputPath);
-            this.input.Save(file.FullName);
+            using (var inputFile = new MemoryStream())
+            {
+                this.input.Save(inputFile, ImageFormat.Png);
+                config.InputFile = Convert.ToBase64String(inputFile.ToArray());
+            }
 
             return config;
         }
