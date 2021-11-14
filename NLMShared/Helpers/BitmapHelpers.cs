@@ -1,4 +1,4 @@
-﻿namespace NLMBaseGUI.Helpers
+﻿namespace NLMShared.Helpers
 {
     using System;
     using System.Collections.Generic;

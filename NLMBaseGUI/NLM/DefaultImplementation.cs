@@ -1,10 +1,12 @@
 namespace NLMBaseGUI.NLM
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
+    using NLMShared.NLM;
 
     public unsafe class DefaultImplementation 
-        : IImplementation
+        : BaseImplementation
     {
         private const float LUTMAX = 30.0f;
         private const float LUTMAXM1 = 29.0f;
@@ -20,15 +22,32 @@ namespace NLMBaseGUI.NLM
         // fpI      Input
         // fpO      Output
 
-        public string Name => "Domyślna";
+        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height, CancellationToken cancellationToken)
+        {
+            var nlmParams = this.MakeParams(sigma, channels);
 
-        public DenoiseFunction Denoise => DenoiseBody;
+            fixed (float* inputFlatPointer = &inputArray[0], outputFlatPointer = &outputArray[0])
+            {
+                var fpI = new float*[channels];
+                var fpO = new float*[channels];
+                for (int ii = 0; ii < channels; ii++)
+                {
+                    fpI[ii] = &inputFlatPointer[ii * width * height];
+                    fpO[ii] = &outputFlatPointer[ii * width * height];
+                }
 
-        public void Dispose()
+                fixed (float** inputPointer = &fpI[0], outputPointer = &fpO[0])
+                {
+                    this.DenoiseBody(nlmParams.Win, nlmParams.Bloc, sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height, cancellationToken);
+                }
+            }
+        }
+
+        public override void Dispose()
         {
         }
 
-        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
+        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight, CancellationToken cancellationToken)
         {
             // length of each channel
             var iwxh = iWidth * iHeight;
@@ -67,6 +86,11 @@ namespace NLMBaseGUI.NLM
 
                 for (var x = 0; x < iWidth; x++)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     // reduce the size of the comparison window if we are near the boundary
                     var iDWin0 = Math.Min(iDWin, Math.Min(iWidth - 1 - x, Math.Min(iHeight - 1 - y, Math.Min(x, y))));
 
@@ -80,6 +104,11 @@ namespace NLMBaseGUI.NLM
                     //  clear current denoised patch
                     for (var ii = 0; ii < iChannels; ii++)
                     {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
                         for (var iii = 0; iii < iwl; iii++)
                         {
                             fpODenoised[ii][iii] = 0.0f;
@@ -94,6 +123,11 @@ namespace NLMBaseGUI.NLM
 
                     for (var j = jmin; j <= jmax; j++)
                     {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
                         for (var i = imin; i <= imax; i++)
                         {
                             if (i != x || j != y)
@@ -134,6 +168,11 @@ namespace NLMBaseGUI.NLM
                     // current patch with fMaxWeight
                     for (var @is = -iDWin0; @is <= iDWin0; @is++)
                     {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
                         var aiindex = (iDWin + @is) * ihwl + iDWin;
                         var ail = (y + @is) * iWidth + x;
 
@@ -156,6 +195,11 @@ namespace NLMBaseGUI.NLM
                     {
                         for (var @is = -iDWin0; @is <= iDWin0; @is++)
                         {
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
                             var aiindex = (iDWin + @is) * ihwl + iDWin;
                             var ail = (y + @is) * iWidth + x;
 

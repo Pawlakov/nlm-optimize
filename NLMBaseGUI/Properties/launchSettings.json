@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NLMBaseGUI": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

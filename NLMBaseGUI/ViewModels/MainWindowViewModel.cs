@@ -29,7 +29,7 @@ namespace NLMBaseGUI.ViewModels
         private Bitmap? noisyImage;
         private Bitmap? filteredImage;
         private int sigma;
-        private IImplementation implementation;
+        private ImplementationModel implementation;
         private FilteringStatsModel? noisingStats;
         private FilteringStatsModel? filteringStats;
         private ISession? currentSesstion;
@@ -39,9 +39,9 @@ namespace NLMBaseGUI.ViewModels
             this.noiseService = new NoiseService();
             this.filterService = new FilterService();
 
-            var defaultImplementation = new DefaultImplementation();
+            var defaultImplementation = new ImplementationModel(null);
             this.implementation = defaultImplementation;
-            this.ImplementationOptions = new AvaloniaList<IImplementation> { defaultImplementation, };
+            this.ImplementationOptions = new AvaloniaList<ImplementationModel> { defaultImplementation, };
 
             this.ShowOpenLibraryDialog = new Interaction<Unit, string[]?>();
             this.ShowOpenImageDialog = new Interaction<Unit, string?>();
@@ -111,7 +111,7 @@ namespace NLMBaseGUI.ViewModels
             }
         }
 
-        public IImplementation Implementation
+        public ImplementationModel Implementation
         {
             get => this.implementation;
             set => this.RaiseAndSetIfChanged(ref this.implementation, value);
@@ -135,7 +135,7 @@ namespace NLMBaseGUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref this.currentSesstion, value);
         }
 
-        public AvaloniaList<IImplementation> ImplementationOptions { get; }
+        public AvaloniaList<ImplementationModel> ImplementationOptions { get; }
 
         public Interaction<Unit, string[]?> ShowOpenLibraryDialog { get; }
 
@@ -316,14 +316,11 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.noisyImage != null)
                 {
-                    this.CurrentSesstion = this.filterService.SetUp();
-                    await this.CurrentSesstion.Run();
-                    /*
-                    (var filteredBitmap, var filteringStats) = await Task.Run(() => this.filterService.MakeFiltered(this.implementation, this.rawImage, this.noisyImage, this.sigma));
+                    this.CurrentSesstion = this.filterService.SetUp(this.implementation, this.noisyImage, this.sigma);
+                    (var filteredBitmap, var filteringStats) = await this.CurrentSesstion.Run(this.rawImage);
                     this.FilteredImage = filteredBitmap;
                     this.FilteringStats = filteringStats;
                     this.SelectedTab = 2;
-                    */
                 }
             }
             catch
@@ -392,7 +389,7 @@ namespace NLMBaseGUI.ViewModels
                                     var file = new FileInfo(libraryName);
                                     if (file.Exists)
                                     {
-                                        var implementation = new ExternalImplementation(file);
+                                        var implementation = new ImplementationModel(file);
                                         this.ImplementationOptions.Add(implementation);
                                         this.Implementation = implementation;
                                     }

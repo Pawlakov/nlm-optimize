@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLMBaseGUI", "NLMBaseGUI\NL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLMRunner", "NLMRunner\NLMRunner.csproj", "{68CDA07A-C1FE-4060-AE6A-033F29FC93A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLMShared", "NLMShared\NLMShared.csproj", "{4EFEC7C9-54DF-4FC7-8D68-2DC404E80FFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLMShared", "NLMShared\NLMShared.csproj", "{4EFEC7C9-54DF-4FC7-8D68-2DC404E80FFD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{477565B3-E791-4F2B-BC61-DF18551691BD}"
+	ProjectSection(SolutionItems) = preProject
+		NLMShared\.editorconfig = NLMShared\.editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

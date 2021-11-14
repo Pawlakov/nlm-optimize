@@ -11,8 +11,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MersenneTwister;
-    using NLMBaseGUI.Helpers;
     using NLMBaseGUI.Models;
+    using NLMShared.Helpers;
 
     public class NoiseService
     {
