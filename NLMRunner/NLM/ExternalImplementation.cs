@@ -6,7 +6,7 @@
     using NLMShared.NLM;
 
     public class ExternalImplementation
-        : BaseImplementation
+        : BaseImplementation, IImplementation
     {
         private const string Symbol = "_Z7DenoiseiiffPPfS0_iii";
 

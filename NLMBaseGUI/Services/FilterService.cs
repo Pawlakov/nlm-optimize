@@ -17,14 +17,7 @@
     {
         public ISession SetUp(ImplementationModel library, Bitmap noisy, int sigma)
         {
-            if (library.File != null)
-            {
-                return new ExternalSession(sigma, noisy, library.File.FullName);
-            }
-            else
-            {
-                return new InternalSession(sigma, noisy);
-            }
+            return new ExternalSession(sigma, noisy, library.File?.FullName);
         }
     }
 }

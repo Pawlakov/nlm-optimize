@@ -19,10 +19,10 @@
     {
         private int sigma;
         private Bitmap input;
-        private string libraryPath;
+        private string? libraryPath;
         private Process? runnerProcess;
 
-        public ExternalSession(int sigma, Bitmap input, string libraryPath)
+        public ExternalSession(int sigma, Bitmap input, string? libraryPath)
         {
             this.sigma = sigma;
             this.input = input;

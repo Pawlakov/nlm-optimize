@@ -1,4 +1,4 @@
-namespace NLMBaseGUI.NLM
+namespace NLMRunner.NLM
 {
     using System;
     using System.Threading;
@@ -6,7 +6,7 @@ namespace NLMBaseGUI.NLM
     using NLMShared.NLM;
 
     public unsafe class DefaultImplementation 
-        : BaseImplementation
+        : BaseImplementation, IImplementation
     {
         private const float LUTMAX = 30.0f;
         private const float LUTMAXM1 = 29.0f;
@@ -22,7 +22,7 @@ namespace NLMBaseGUI.NLM
         // fpI      Input
         // fpO      Output
 
-        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height, CancellationToken cancellationToken)
+        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
         {
             var nlmParams = this.MakeParams(sigma, channels);
 
@@ -38,7 +38,7 @@ namespace NLMBaseGUI.NLM
 
                 fixed (float** inputPointer = &fpI[0], outputPointer = &fpO[0])
                 {
-                    this.DenoiseBody(nlmParams.Win, nlmParams.Bloc, sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height, cancellationToken);
+                    this.DenoiseBody(nlmParams.Win, nlmParams.Bloc, sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height);
                 }
             }
         }
@@ -47,7 +47,7 @@ namespace NLMBaseGUI.NLM
         {
         }
 
-        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight, CancellationToken cancellationToken)
+        private void DenoiseBody(int iDWin, int iDBloc, float fSigma, float fFiltPar, float** fpI, float** fpO, int iChannels, int iWidth, int iHeight)
         {
             // length of each channel
             var iwxh = iWidth * iHeight;
@@ -86,11 +86,6 @@ namespace NLMBaseGUI.NLM
 
                 for (var x = 0; x < iWidth; x++)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
                     // reduce the size of the comparison window if we are near the boundary
                     var iDWin0 = Math.Min(iDWin, Math.Min(iWidth - 1 - x, Math.Min(iHeight - 1 - y, Math.Min(x, y))));
 
@@ -104,11 +99,6 @@ namespace NLMBaseGUI.NLM
                     //  clear current denoised patch
                     for (var ii = 0; ii < iChannels; ii++)
                     {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
                         for (var iii = 0; iii < iwl; iii++)
                         {
                             fpODenoised[ii][iii] = 0.0f;
@@ -123,11 +113,6 @@ namespace NLMBaseGUI.NLM
 
                     for (var j = jmin; j <= jmax; j++)
                     {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
                         for (var i = imin; i <= imax; i++)
                         {
                             if (i != x || j != y)
@@ -168,11 +153,6 @@ namespace NLMBaseGUI.NLM
                     // current patch with fMaxWeight
                     for (var @is = -iDWin0; @is <= iDWin0; @is++)
                     {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
                         var aiindex = (iDWin + @is) * ihwl + iDWin;
                         var ail = (y + @is) * iWidth + x;
 
@@ -195,11 +175,6 @@ namespace NLMBaseGUI.NLM
                     {
                         for (var @is = -iDWin0; @is <= iDWin0; @is++)
                         {
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                break;
-                            }
-
                             var aiindex = (iDWin + @is) * ihwl + iDWin;
                             var ail = (y + @is) * iWidth + x;
 

@@ -19,7 +19,7 @@
             var result = new RunResultDto();
 
             var clientPipe = new ClientPipe(".", "testpipe", x => x.StartByteReaderAsync());
-            clientPipe.DataReceived += (sndr, args) => 
+            clientPipe.DataReceived += (sndr, args) =>
             {
                 config = JsonConvert.DeserializeObject<RunConfigDto>(args.String);
             };
@@ -30,8 +30,8 @@
 
             try
             {
-                var implementationFile = new FileInfo(config.LibraryPath);
-                using (var implementation = new ExternalImplementation(implementationFile))
+                var implementationFile = string.IsNullOrWhiteSpace(config.LibraryPath) ? null : new FileInfo(config.LibraryPath);
+                using (var implementation = (IImplementation)(implementationFile != null ? new ExternalImplementation(implementationFile) : new DefaultImplementation()))
                 {
                     var inputFile = new FileInfo(config.InputPath);
                     var input = new Bitmap(inputFile.FullName);
