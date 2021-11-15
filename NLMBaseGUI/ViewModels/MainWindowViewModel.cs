@@ -179,11 +179,11 @@ namespace NLMBaseGUI.ViewModels
                                 this.RawImage = new Bitmap(x);
                             }
                         }
-                        catch
+                        catch (Exception exception)
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                this.ShowMessageBox.Handle(exception.Message).Subscribe();
                             }).Wait();
                         }
                     },
@@ -191,16 +191,16 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle("B��d!").Subscribe();
+                            this.ShowMessageBox.Handle(x.Message).Subscribe();
                         }).Wait();
                     },
                     () =>
                     {
                     });
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowMessageBox.Handle(exception.Message).Subscribe();
             }
         }
 
@@ -323,9 +323,9 @@ namespace NLMBaseGUI.ViewModels
                     this.SelectedTab = 2;
                 }
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("Błąd!").Subscribe();
+                this.ShowMessageBox.Handle(exception.Message).Subscribe();
             }
             finally
             {
