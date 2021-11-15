@@ -46,7 +46,7 @@ namespace NLMBaseGUI.ViewModels
             this.ShowOpenLibraryDialog = new Interaction<Unit, string[]?>();
             this.ShowOpenImageDialog = new Interaction<Unit, string?>();
             this.ShowSaveImageDialog = new Interaction<Unit, string?>();
-            this.ShowMessageBox = new Interaction<string, Unit>();
+            this.ShowExceptionMessageBox = new Interaction<Exception, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
             this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAnyValue(x => x.RawImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
@@ -143,7 +143,7 @@ namespace NLMBaseGUI.ViewModels
 
         public Interaction<Unit, string?> ShowSaveImageDialog { get; }
 
-        public Interaction<string, Unit> ShowMessageBox { get; }
+        public Interaction<Exception, Unit> ShowExceptionMessageBox { get; }
 
         public ReactiveCommand<Unit, Unit> LoadRawCommand { get; }
 
@@ -183,7 +183,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle(exception.Message).Subscribe();
+                                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
                             }).Wait();
                         }
                     },
@@ -191,7 +191,7 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle(x.Message).Subscribe();
+                            this.ShowExceptionMessageBox.Handle(x).Subscribe();
                         }).Wait();
                     },
                     () =>
@@ -200,7 +200,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch (Exception exception)
             {
-                this.ShowMessageBox.Handle(exception.Message).Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
         }
 
@@ -217,9 +217,9 @@ namespace NLMBaseGUI.ViewModels
                     this.SelectedTab = 1;
                 }
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
             finally
             {
@@ -245,11 +245,11 @@ namespace NLMBaseGUI.ViewModels
                                 this.NoisyImage = new Bitmap(x);
                             }
                         }
-                        catch
+                        catch (Exception exception)
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
                             }).Wait();
                         }
                     },
@@ -257,16 +257,16 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle("B��d!").Subscribe();
+                            this.ShowExceptionMessageBox.Handle(x).Subscribe();
                         }).Wait();
                     },
                     () =>
                     {
                     });
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
         }
 
@@ -283,11 +283,11 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 this.noisyImage.Save(x);
                             }
-                            catch
+                            catch (Exception exception)
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>
                                 {
-                                    this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                    this.ShowExceptionMessageBox.Handle(exception).Subscribe();
                                 }).Wait();
                             }
                         },
@@ -295,7 +295,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                this.ShowExceptionMessageBox.Handle(x).Subscribe();
                             }).Wait();
                         },
                         () =>
@@ -303,9 +303,9 @@ namespace NLMBaseGUI.ViewModels
                         });
                 }
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
         }
 
@@ -325,7 +325,7 @@ namespace NLMBaseGUI.ViewModels
             }
             catch (Exception exception)
             {
-                this.ShowMessageBox.Handle(exception.Message).Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
             finally
             {
@@ -347,11 +347,11 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 this.filteredImage.Save(x);
                             }
-                            catch
+                            catch (Exception exception)
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>
                                 {
-                                    this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                    this.ShowExceptionMessageBox.Handle(exception).Subscribe();
                                 }).Wait();
                             }
                         },
@@ -359,7 +359,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                this.ShowExceptionMessageBox.Handle(x).Subscribe();
                             }).Wait();
                         },
                         () =>
@@ -367,9 +367,9 @@ namespace NLMBaseGUI.ViewModels
                         });
                 }
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
         }
 
@@ -396,11 +396,11 @@ namespace NLMBaseGUI.ViewModels
                                 }
                             }
                         }
-                        catch
+                        catch (Exception exception)
                         {
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
                             }).Wait();
                         }
                     },
@@ -408,16 +408,16 @@ namespace NLMBaseGUI.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            this.ShowMessageBox.Handle("B��d!").Subscribe();
+                            this.ShowExceptionMessageBox.Handle(x).Subscribe();
                         }).Wait();
                     },
                     () =>
                     {
                     });
             }
-            catch
+            catch (Exception exception)
             {
-                this.ShowMessageBox.Handle("B��d!").Subscribe();
+                this.ShowExceptionMessageBox.Handle(exception).Subscribe();
             }
         }
 

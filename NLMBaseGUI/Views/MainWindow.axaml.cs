@@ -1,5 +1,6 @@
 namespace NLMBaseGUI.Views
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reactive;
@@ -27,7 +28,7 @@ namespace NLMBaseGUI.Views
                 d(this.ViewModel!.ShowOpenLibraryDialog.RegisterHandler(this.ShowOpenLibraryDialog));
                 d(this.ViewModel!.ShowOpenImageDialog.RegisterHandler(this.ShowOpenImageDialog));
                 d(this.ViewModel!.ShowSaveImageDialog.RegisterHandler(this.ShowSaveImageDialog));
-                d(this.ViewModel!.ShowMessageBox.RegisterHandler(this.ShowMessageBox));
+                d(this.ViewModel!.ShowExceptionMessageBox.RegisterHandler(this.ShowExceptionMessageBox));
             });
         }
 
@@ -109,14 +110,14 @@ namespace NLMBaseGUI.Views
             interaction.SetOutput(fileName);
         }
 
-        private async Task ShowMessageBox(InteractionContext<string, Unit> interaction)
+        private async Task ShowExceptionMessageBox(InteractionContext<Exception, Unit> interaction)
         {
             var msBoxStandardWindow = MessageBoxManager
                 .GetMessageBoxStandardWindow(new MessageBoxStandardParams
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
-                    ContentTitle = "B³¹d",
-                    ContentMessage = interaction.Input,
+                    ContentTitle = "Wyj¹tek",
+                    ContentMessage = interaction.Input.ToString(),
                     Icon = global::MessageBox.Avalonia.Enums.Icon.Error,
                 });
 
