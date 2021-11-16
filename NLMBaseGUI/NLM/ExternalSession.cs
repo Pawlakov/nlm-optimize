@@ -32,6 +32,9 @@
 
         public override async Task<(Bitmap, FilteringStatsModel)> Run(Bitmap? raw)
         {
+            var filtered = (Bitmap)null;
+            var stats = (FilteringStatsModel)null;
+
             var runConfig = this.PrepareConfig();
             var configSerialized = JsonConvert.SerializeObject(runConfig, Formatting.None);
 
@@ -43,35 +46,45 @@
             var runResult = (RunResultDto?)null;
 
             var serverPipe = new ServerPipe("testpipe", x => x.StartByteReaderAsync());
-            serverPipe.DataReceived += (sndr, args) => runResult = JsonConvert.DeserializeObject<RunResultDto>(args.String);
             serverPipe.Connected += async (sndr, args) => await serverPipe.WriteString(configSerialized);
-
-            await Task.Run(() => this.runnerProcess.WaitForExit());
-            this.runnerProcess.Close();
-
-            if (runResult != null)
+            serverPipe.DataReceived += (sndr, args) =>
             {
-                if (runResult.Exception != null)
+                runResult = JsonConvert.DeserializeObject<RunResultDto>(args.String);
+            };
+            serverPipe.PipeClosed += (sndr, args) => 
+            {
+                this.runnerProcess.WaitForExit();
+                this.runnerProcess.Close();
+
+                if (runResult != null)
                 {
-                    throw runResult.Exception;
+                    if (runResult.Exception != null)
+                    {
+                        throw runResult.Exception;
+                    }
+                    else
+                    {
+                        using (var filteredFile = new MemoryStream(Convert.FromBase64String(runResult.OutputFile)))
+                        {
+                            filtered = new Bitmap(filteredFile);
+                        }
+
+                        stats = this.CalculateStats(raw, filtered, runResult.Time);
+                    }
                 }
                 else
                 {
-                    var filtered = (Bitmap)null;
-                    using (var filteredFile = new MemoryStream(Convert.FromBase64String(runResult.OutputFile)))
-                    {
-                        filtered = new Bitmap(filteredFile);
-                    }
-
-                    var stats = this.CalculateStats(raw, filtered, runResult.Time);
-
-                    return (filtered, stats);
+                    throw new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
                 }
-            }
-            else
+            };
+
+            await Task.Run(() =>
             {
-                throw new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
-            }
+                while (filtered == null || stats == null)
+                { }
+            });
+
+            return (filtered, stats);
         }
 
         public override async Task Cancel()

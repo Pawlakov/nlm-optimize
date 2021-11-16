@@ -19,7 +19,7 @@
                 pipeName,
                 PipeDirection.InOut,
                 NamedPipeServerStream.MaxAllowedServerInstances,
-                PipeTransmissionMode.Message,
+                PipeTransmissionMode.Byte,
                 PipeOptions.Asynchronous);
 
             pipeStream = serverPipeStream;
