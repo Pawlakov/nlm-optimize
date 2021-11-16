@@ -35,9 +35,11 @@
             var runConfig = this.PrepareConfig();
             var configSerialized = JsonConvert.SerializeObject(runConfig, Formatting.None);
 
+            var runnerFile = new FileInfo(Path.Combine("bin", "Debug", "net5.0", "NLMRunner.dll"));
+
             this.runnerProcess = new Process();
-            this.runnerProcess.StartInfo.FileName = "NLMRunner.exe";
-            this.runnerProcess.StartInfo.UseShellExecute = false;
+            this.runnerProcess.StartInfo.FileName = $"dotnet {runnerFile.FullName}";
+            this.runnerProcess.StartInfo.UseShellExecute = true;
             this.runnerProcess.Start();
 
             var runResult = (RunResultDto?)null;
