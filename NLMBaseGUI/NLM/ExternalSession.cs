@@ -40,11 +40,6 @@
 
             var runnerFile = new FileInfo(Path.Combine("bin", "Debug", "net5.0", "NLMRunner.dll"));
 
-            this.runnerProcess = new Process();
-            this.runnerProcess.StartInfo.FileName = $"dotnet {runnerFile.FullName}";
-            this.runnerProcess.StartInfo.UseShellExecute = true;
-            this.runnerProcess.Start();
-
             var runResult = (RunResultDto?)null;
 
             var serverPipe = new ServerPipe("testpipe", x => x.StartByteReaderAsync());
@@ -80,11 +75,24 @@
                 }
             };
 
+            this.runnerProcess = Process.Start(new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                //Arguments = runnerFile.FullName,
+                Arguments = Path.Combine("bin", "Debug", "net5.0", "NLMRunner.dll"),
+                ErrorDialog = true,
+            });
+
             await Task.Run(() =>
             {
-                while (filtered == null || stats == null)
+                while (!this.runnerProcess.HasExited)
                 { }
             });
+
+            if (filtered == null || stats == null)
+            {
+                throw new ApplicationException("Proces zakończył się bez rezultatu.");
+            }
 
             return (filtered, stats);
         }
