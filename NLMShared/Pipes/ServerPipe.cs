@@ -3,34 +3,36 @@
     using System;
     using System.IO.Pipes;
 
-    public class ServerPipe : BasicPipe
+    public class ServerPipe
+        : BasicPipe
     {
-        public event EventHandler<EventArgs> Connected;
-
-        protected NamedPipeServerStream serverPipeStream;
-        protected string PipeName { get; set; }
+        private readonly NamedPipeServerStream serverPipeStream;
 
         public ServerPipe(string pipeName, Action<BasicPipe> asyncReaderStart)
         {
-            this.asyncReaderStart = asyncReaderStart;
-            PipeName = pipeName;
+            this.AsyncReaderStart = asyncReaderStart;
+            this.PipeName = pipeName;
 
-            serverPipeStream = new NamedPipeServerStream(
+            this.serverPipeStream = new NamedPipeServerStream(
                 pipeName,
                 PipeDirection.InOut,
                 NamedPipeServerStream.MaxAllowedServerInstances,
                 PipeTransmissionMode.Byte,
                 PipeOptions.Asynchronous);
 
-            pipeStream = serverPipeStream;
-            serverPipeStream.BeginWaitForConnection(new AsyncCallback(PipeConnected), null);
+            this.PipeStream = this.serverPipeStream;
+            this.serverPipeStream.BeginWaitForConnection(new AsyncCallback(this.PipeConnected), null);
         }
+
+        public event EventHandler<EventArgs> Connected;
+
+        protected string PipeName { get; set; }
 
         protected void PipeConnected(IAsyncResult ar)
         {
-            serverPipeStream.EndWaitForConnection(ar);
-            Connected?.Invoke(this, new EventArgs());
-            asyncReaderStart(this);
+            this.serverPipeStream.EndWaitForConnection(ar);
+            this.Connected?.Invoke(this, new EventArgs());
+            this.AsyncReaderStart(this);
         }
     }
 }

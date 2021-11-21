@@ -15,11 +15,12 @@ namespace NLMBaseGUI.Views
     using NLMBaseGUI.ViewModels;
     using ReactiveUI;
 
-    public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+    public partial class MainWindow
+        : ReactiveWindow<MainWindowViewModel>
     {
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 #if DEBUG
             this.AttachDevTools();
 #endif
@@ -37,7 +38,7 @@ namespace NLMBaseGUI.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        private async Task ShowOpenLibraryDialog(InteractionContext<Unit, string[]?> interaction)
+        private async Task ShowOpenLibraryDialog(InteractionContext<Unit, string[]> interaction)
         {
             var dialog = new OpenFileDialog
             {
@@ -60,7 +61,7 @@ namespace NLMBaseGUI.Views
             interaction.SetOutput(fileNames);
         }
 
-        private async Task ShowOpenImageDialog(InteractionContext<Unit, string?> interaction)
+        private async Task ShowOpenImageDialog(InteractionContext<Unit, string> interaction)
         {
             var dialog = new OpenFileDialog
             {
@@ -85,7 +86,7 @@ namespace NLMBaseGUI.Views
             interaction.SetOutput(fileNames.FirstOrDefault());
         }
 
-        private async Task ShowSaveImageDialog(InteractionContext<Unit, string?> interaction)
+        private async Task ShowSaveImageDialog(InteractionContext<Unit, string> interaction)
         {
             var dialog = new SaveFileDialog
             {

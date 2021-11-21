@@ -5,7 +5,7 @@ namespace NLMBaseGUI.ViewModels
     using System.Text;
     using ReactiveUI;
 
-    public class ViewModelBase 
+    public class ViewModelBase
         : ReactiveObject
     {
     }

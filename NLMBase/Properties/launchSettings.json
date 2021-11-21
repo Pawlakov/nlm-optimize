@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "NLMBase": {
-      "commandName": "Project",
-      "commandLineArgs": "-i osmosis.jpg -s 25"
-    }
-  }
-}

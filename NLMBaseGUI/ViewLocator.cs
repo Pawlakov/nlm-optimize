@@ -5,7 +5,7 @@ namespace NLMBaseGUI
     using Avalonia.Controls.Templates;
     using NLMBaseGUI.ViewModels;
 
-    public class ViewLocator 
+    public class ViewLocator
         : IDataTemplate
     {
         public bool SupportsRecycling => false;

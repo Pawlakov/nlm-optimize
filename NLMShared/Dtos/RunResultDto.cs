@@ -9,6 +9,6 @@
         /*public string OutputPath { get; set; }*/
         public string OutputFile { get; set; }
 
-        public Exception? Exception { get; set; }
+        public Exception Exception { get; set; }
     }
 }

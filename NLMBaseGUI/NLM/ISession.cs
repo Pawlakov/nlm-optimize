@@ -10,7 +10,7 @@
 
     public interface ISession
     {
-        Task<(Bitmap, FilteringStatsModel)> Run(Bitmap? raw);
+        Task<(Bitmap, FilteringStatsModel)> Run(Bitmap raw);
 
         Task Cancel();
     }

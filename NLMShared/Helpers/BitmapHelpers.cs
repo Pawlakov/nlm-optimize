@@ -172,10 +172,10 @@
 
             private static Grid Filter(Grid a, Grid b)
             {
-                // todo - check and clean this                                                                                                          
+                // todo - check and clean this
                 int ax = a.Width, ay = a.Height;
                 int bx = b.Width, by = b.Height;
-                int bcx = (bx + 1) / 2, bcy = (by + 1) / 2; // center position                                                                          
+                int bcx = (bx + 1) / 2, bcy = (by + 1) / 2; // center position
                 var c = new Grid(ax - bx + 1, ay - by + 1);
                 for (int i = bx - bcx + 1; i < ax - bx; ++i)
                 {
@@ -204,39 +204,39 @@
 
             private double ComputeSSIM(Grid img1, Grid img2)
             {
-                // uses notation from paper                                                                                                             
-                // automatic downsampling                                                                                                               
+                // uses notation from paper
+                // automatic downsampling
                 int f = (int)Math.Max(1, Math.Round(Math.Min(img1.Width, img1.Height) / 256.0));
                 if (f > 1)
-                { // downsampling by f                                                                                                              
-                  // use a simple low-pass filter and subsample by f                                                                                
+                { // downsampling by f
+                  // use a simple low-pass filter and subsample by f
                     img1 = SubSample(img1, f);
                     img2 = SubSample(img2, f);
                 }
 
-                // normalize window - todo - do in window set {}                                                                                        
-                double scale = 1.0 / window.Total;
-                Grid.Op((i, j) => window[i, j] * scale, window);
+                // normalize window - todo - do in window set {}
+                double scale = 1.0 / this.window.Total;
+                Grid.Op((i, j) => this.window[i, j] * scale, this.window);
 
-                // image statistics                                                                                                                     
-                var mu1 = Filter(img1, window);
-                var mu2 = Filter(img2, window);
+                // image statistics
+                var mu1 = Filter(img1, this.window);
+                var mu2 = Filter(img2, this.window);
 
                 var mu1mu2 = mu1 * mu2;
                 var mu1SQ = mu1 * mu1;
                 var mu2SQ = mu2 * mu2;
 
-                var sigma12 = Filter(img1 * img2, window) - mu1mu2;
-                var sigma1SQ = Filter(img1 * img1, window) - mu1SQ;
-                var sigma2SQ = Filter(img2 * img2, window) - mu2SQ;
+                var sigma12 = Filter(img1 * img2, this.window) - mu1mu2;
+                var sigma1SQ = Filter(img1 * img1, this.window) - mu1SQ;
+                var sigma2SQ = Filter(img2 * img2, this.window) - mu2SQ;
 
-                // constants from the paper                                                                                                             
+                // constants from the paper
                 var c1 = K1 * L;
                 c1 *= c1;
                 var c2 = K2 * L;
                 c2 *= c2;
 
-                Grid? ssim_map = null;
+                var ssim_map = (Grid)null;
                 if ((c1 > 0) && (c2 > 0))
                 {
                     ssim_map = Grid.Op(
@@ -252,7 +252,7 @@
                     var den1 = Linear(1, mu1SQ + mu2SQ, c1);
                     var den2 = Linear(1, sigma1SQ + sigma2SQ, c2);
 
-                    var den = den1 * den2; // total denominator                                                                                         
+                    var den = den1 * den2; // total denominator
                     ssim_map = new Grid(mu1.Width, mu1.Height);
                     for (int i = 0; i < ssim_map.Width; ++i)
                     {
@@ -271,7 +271,7 @@
                     }
                 }
 
-                // average all values                                                                                                                   
+                // average all values
                 return ssim_map.Total / (ssim_map.Width * ssim_map.Height);
             }
 
@@ -281,9 +281,9 @@
 
                 public Grid(int w, int h)
                 {
-                    data = new double[w, h];
-                    Width = w;
-                    Height = h;
+                    this.data = new double[w, h];
+                    this.Width = w;
+                    this.Height = h;
                 }
 
                 public int Width { get; set; }
@@ -295,7 +295,7 @@
                     get
                     {
                         double s = 0;
-                        foreach (var d in data)
+                        foreach (var d in this.data)
                         {
                             s += d;
                         }
@@ -306,8 +306,8 @@
 
                 public double this[int i, int j]
                 {
-                    get { return data[i, j]; }
-                    set { data[i, j] = value; }
+                    get { return this.data[i, j]; }
+                    set { this.data[i, j] = value; }
                 }
 
                 public static Grid operator +(Grid a, Grid b)

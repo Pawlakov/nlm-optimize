@@ -20,35 +20,39 @@
     {
         private int sigma;
         private Bitmap input;
-        private string? libraryPath;
-        private Process? runnerProcess;
+        private string libraryPath;
+        private Process runnerProcess;
+        private bool cancelled;
 
-        public ExternalSession(int sigma, Bitmap input, string? libraryPath)
+        public ExternalSession(int sigma, Bitmap input, string libraryPath)
         {
             this.sigma = sigma;
             this.input = input;
             this.libraryPath = libraryPath;
         }
 
-        public override async Task<(Bitmap, FilteringStatsModel)> Run(Bitmap? raw)
+        public override async Task<(Bitmap, FilteringStatsModel)> Run(Bitmap raw)
         {
             var filtered = (Bitmap)null;
             var stats = (FilteringStatsModel)null;
+            var runnerExited = false;
+            var runnerException = (Exception)null;
 
             var runConfig = this.PrepareConfig();
             var configSerialized = JsonConvert.SerializeObject(runConfig, Formatting.None);
 
-            var runnerFile = new FileInfo(Path.Combine("bin", "Debug", "net5.0", "NLMRunner.dll"));
-
-            var runResult = (RunResultDto?)null;
+            var runResult = (RunResultDto)null;
 
             var serverPipe = new ServerPipe("testpipe", x => x.StartByteReaderAsync());
-            serverPipe.Connected += async (sndr, args) => await serverPipe.WriteString(configSerialized);
+            serverPipe.Connected += async (sndr, args) =>
+            {
+                await serverPipe.WriteString(configSerialized);
+            };
             serverPipe.DataReceived += (sndr, args) =>
             {
                 runResult = JsonConvert.DeserializeObject<RunResultDto>(args.String);
             };
-            serverPipe.PipeClosed += (sndr, args) => 
+            serverPipe.PipeClosed += (sndr, args) =>
             {
                 this.runnerProcess.WaitForExit();
                 this.runnerProcess.Close();
@@ -57,7 +61,7 @@
                 {
                     if (runResult.Exception != null)
                     {
-                        throw runResult.Exception;
+                        runnerException = runResult.Exception;
                     }
                     else
                     {
@@ -69,25 +73,36 @@
                         stats = this.CalculateStats(raw, filtered, runResult.Time);
                     }
                 }
-                else
+                else if (!this.cancelled)
                 {
-                    throw new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
+                    runnerException = new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
                 }
+
+                runnerExited = true;
             };
 
             this.runnerProcess = Process.Start(new ProcessStartInfo
             {
+#if Linux
                 FileName = "dotnet",
-                //Arguments = runnerFile.FullName,
                 Arguments = Path.Combine("bin", "Debug", "net5.0", "NLMRunner.dll"),
                 ErrorDialog = true,
+#elif Windows
+                FileName = "NLMRunner.exe",
+#endif
             });
 
             await Task.Run(() =>
             {
-                while (!this.runnerProcess.HasExited)
-                { }
+                while (!runnerExited)
+                {
+                }
             });
+
+            if (runnerException != null)
+            {
+                throw runnerException;
+            }
 
             if (filtered == null || stats == null)
             {
@@ -101,6 +116,7 @@
         {
             if (this.runnerProcess != null)
             {
+                this.cancelled = true;
                 await Task.Run(() => this.runnerProcess.Kill());
             }
         }

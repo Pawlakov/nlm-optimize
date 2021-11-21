@@ -1,18 +1,20 @@
-﻿using System;
-using System.Text;
-
-namespace NLMShared.Pipes
+﻿namespace NLMShared.Pipes
 {
+    using System;
+    using System.Text;
+
     public class PipeEventArgs
     {
-        public byte[] Data { get; protected set; }
-        public string String { get; protected set; }
-        public int Len => Data?.Length ?? 0;
-
         public PipeEventArgs(byte[] data)
         {
-            Data = data;
-            String = Encoding.UTF8.GetString(data).TrimEnd('\0');
+            this.Data = data;
+            this.String = Encoding.UTF8.GetString(data).TrimEnd('\0');
         }
+
+        public byte[] Data { get; protected set; }
+
+        public string String { get; protected set; }
+
+        public int Len => this.Data?.Length ?? 0;
     }
 }

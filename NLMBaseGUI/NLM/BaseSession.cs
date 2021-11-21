@@ -16,9 +16,9 @@
     {
         public abstract Task Cancel();
 
-        public abstract Task<(Bitmap, FilteringStatsModel)> Run(Bitmap? raw);
+        public abstract Task<(Bitmap, FilteringStatsModel)> Run(Bitmap raw);
 
-        protected FilteringStatsModel CalculateStats(Bitmap? raw, Bitmap altered, long time)
+        protected FilteringStatsModel CalculateStats(Bitmap raw, Bitmap altered, long time)
         {
             var mseResult = (float?)null;
             var ssimResult = (float?)null;

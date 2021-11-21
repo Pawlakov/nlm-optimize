@@ -18,44 +18,46 @@ namespace NLMBaseGUI.ViewModels
     using NLMBaseGUI.Services;
     using ReactiveUI;
 
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel
+        : ViewModelBase
     {
         private readonly NoiseService noiseService;
         private readonly FilterService filterService;
 
         private bool isProcessing;
         private int selectedTab;
-        private Bitmap? rawImage;
-        private Bitmap? noisyImage;
-        private Bitmap? filteredImage;
+        private Bitmap rawImage;
+        private Bitmap noisyImage;
+        private Bitmap filteredImage;
         private int sigma;
         private ImplementationModel implementation;
-        private FilteringStatsModel? noisingStats;
-        private FilteringStatsModel? filteringStats;
-        private ISession? currentSesstion;
+        private FilteringStatsModel noisingStats;
+        private FilteringStatsModel filteringStats;
+        private ISession currentSesstion;
 
         public MainWindowViewModel()
         {
             this.noiseService = new NoiseService();
             this.filterService = new FilterService();
 
+            this.sigma = 1;
             var defaultImplementation = new ImplementationModel(null);
             this.implementation = defaultImplementation;
             this.ImplementationOptions = new AvaloniaList<ImplementationModel> { defaultImplementation, };
 
-            this.ShowOpenLibraryDialog = new Interaction<Unit, string[]?>();
-            this.ShowOpenImageDialog = new Interaction<Unit, string?>();
-            this.ShowSaveImageDialog = new Interaction<Unit, string?>();
+            this.ShowOpenLibraryDialog = new Interaction<Unit, string[]>();
+            this.ShowOpenImageDialog = new Interaction<Unit, string>();
+            this.ShowSaveImageDialog = new Interaction<Unit, string>();
             this.ShowExceptionMessageBox = new Interaction<Exception, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
-            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAnyValue(x => x.RawImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAnyValue(x => x.RawImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadNoisyCommand = ReactiveCommand.Create(this.LoadNoisy);
-            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
-            this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
-            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAnyValue(x => x.NoisyImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadImplementationCommand = ReactiveCommand.Create(this.LoadImplementation);
-            this.CancelTaskCommand = ReactiveCommand.Create(this.CancelTask, this.WhenAnyValue(x => x.CurrentSesstion, (ISession? x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.CancelTaskCommand = ReactiveCommand.Create(this.CancelTask, this.WhenAnyValue(x => x.CurrentSesstion, (ISession x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
         }
 
         public bool IsProcessing
@@ -70,19 +72,19 @@ namespace NLMBaseGUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref this.selectedTab, value);
         }
 
-        public Bitmap? RawImage
+        public Bitmap RawImage
         {
             get => this.rawImage;
             set => this.RaiseAndSetIfChanged(ref this.rawImage, value);
         }
 
-        public Bitmap? NoisyImage
+        public Bitmap NoisyImage
         {
             get => this.noisyImage;
             set => this.RaiseAndSetIfChanged(ref this.noisyImage, value);
         }
 
-        public Bitmap? FilteredImage
+        public Bitmap FilteredImage
         {
             get => this.filteredImage;
             set => this.RaiseAndSetIfChanged(ref this.filteredImage, value);
@@ -99,9 +101,9 @@ namespace NLMBaseGUI.ViewModels
                     {
                         parsed = 100;
                     }
-                    else if (parsed < 0)
+                    else if (parsed < 1)
                     {
-                        parsed = 0;
+                        parsed = 1;
                     }
 
                     this.sigma = parsed;
@@ -117,19 +119,19 @@ namespace NLMBaseGUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref this.implementation, value);
         }
 
-        public FilteringStatsModel? NoisingStats
+        public FilteringStatsModel NoisingStats
         {
             get => this.noisingStats;
             set => this.RaiseAndSetIfChanged(ref this.noisingStats, value);
         }
 
-        public FilteringStatsModel? FilteringStats 
+        public FilteringStatsModel FilteringStats
         {
             get => this.filteringStats;
             set => this.RaiseAndSetIfChanged(ref this.filteringStats, value);
         }
 
-        public ISession? CurrentSesstion
+        public ISession CurrentSesstion
         {
             get => this.currentSesstion;
             set => this.RaiseAndSetIfChanged(ref this.currentSesstion, value);
@@ -137,11 +139,11 @@ namespace NLMBaseGUI.ViewModels
 
         public AvaloniaList<ImplementationModel> ImplementationOptions { get; }
 
-        public Interaction<Unit, string[]?> ShowOpenLibraryDialog { get; }
+        public Interaction<Unit, string[]> ShowOpenLibraryDialog { get; }
 
-        public Interaction<Unit, string?> ShowOpenImageDialog { get; }
+        public Interaction<Unit, string> ShowOpenImageDialog { get; }
 
-        public Interaction<Unit, string?> ShowSaveImageDialog { get; }
+        public Interaction<Unit, string> ShowSaveImageDialog { get; }
 
         public Interaction<Exception, Unit> ShowExceptionMessageBox { get; }
 
@@ -170,11 +172,7 @@ namespace NLMBaseGUI.ViewModels
                     {
                         try
                         {
-                            if (x == null)
-                            {
-                                this.RawImage = null;
-                            }
-                            else
+                            if (x != null)
                             {
                                 this.RawImage = new Bitmap(x);
                             }
@@ -236,11 +234,7 @@ namespace NLMBaseGUI.ViewModels
                     {
                         try
                         {
-                            if (x == null)
-                            {
-                                this.NoisyImage = null;
-                            }
-                            else
+                            if (x != null)
                             {
                                 this.NoisyImage = new Bitmap(x);
                             }
@@ -281,7 +275,10 @@ namespace NLMBaseGUI.ViewModels
                         {
                             try
                             {
-                                this.noisyImage.Save(x);
+                                if (x != null)
+                                {
+                                    this.noisyImage.Save(x);
+                                }
                             }
                             catch (Exception exception)
                             {
@@ -345,7 +342,10 @@ namespace NLMBaseGUI.ViewModels
                         {
                             try
                             {
-                                this.filteredImage.Save(x);
+                                if (x != null)
+                                {
+                                    this.filteredImage.Save(x);
+                                }
                             }
                             catch (Exception exception)
                             {
@@ -378,7 +378,7 @@ namespace NLMBaseGUI.ViewModels
             try
             {
                 this.ShowOpenLibraryDialog.Handle(Unit.Default).Subscribe(
-                    x => 
+                    x =>
                     {
                         try
                         {

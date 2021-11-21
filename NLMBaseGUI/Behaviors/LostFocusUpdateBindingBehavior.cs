@@ -11,7 +11,7 @@
     using Avalonia.Interactivity;
     using Avalonia.Xaml.Interactivity;
 
-    public class LostFocusUpdateBindingBehavior 
+    public class LostFocusUpdateBindingBehavior
         : Behavior<TextBox>
     {
         public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<LostFocusUpdateBindingBehavior, string>("Text", defaultBindingMode: BindingMode.TwoWay);
@@ -42,7 +42,7 @@
             base.OnDetaching();
         }
 
-        private void OnLostFocus(object? sender, RoutedEventArgs e)
+        private void OnLostFocus(object sender, RoutedEventArgs e)
         {
             if (this.AssociatedObject != null)
             {

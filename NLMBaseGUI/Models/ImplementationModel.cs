@@ -9,13 +9,13 @@
 
     public class ImplementationModel
     {
-        public ImplementationModel(FileInfo? file)
+        public ImplementationModel(FileInfo file)
         {
             this.File = file;
         }
 
         public string Name => this.File == null ? "Domyślna" : this.File.Name;
 
-        public FileInfo? File { get; set; }
+        public FileInfo File { get; set; }
     }
 }

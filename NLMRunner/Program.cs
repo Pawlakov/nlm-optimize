@@ -23,11 +23,14 @@
             clientPipe.DataReceived += (sndr, args) =>
             {
                 config = JsonConvert.DeserializeObject<RunConfigDto>(args.String);
+                Console.WriteLine("Odebrano konfigurację");
             };
 
             clientPipe.Connect();
 
-            while (config == null) { }
+            while (config == null)
+            {
+            }
 
             try
             {
@@ -65,6 +68,7 @@
             {
                 var resultSerialized = JsonConvert.SerializeObject(result, Formatting.None);
                 await clientPipe.WriteString(resultSerialized);
+                Console.WriteLine("Odesłano wyniki");
             }
         }
     }

@@ -5,7 +5,7 @@ namespace NLMRunner.NLM
     using System.Threading.Tasks;
     using NLMShared.NLM;
 
-    public unsafe class DefaultImplementation 
+    public unsafe class DefaultImplementation
         : BaseImplementation, IImplementation
     {
         private const float LUTMAX = 30.0f;
@@ -14,13 +14,6 @@ namespace NLMRunner.NLM
 
         private const float fTiny = 0.00000001f;
         private const float fLarge = 100000000.0f;
-
-        // iDWin    Half size of patch
-        // iDBloc   Half size of research window
-        // fSigma   Noise parameter
-        // fFiltPar Filtering parameter
-        // fpI      Input
-        // fpO      Output
 
         public unsafe void RunDenoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
         {
@@ -52,9 +45,9 @@ namespace NLMRunner.NLM
             // length of each channel
             var iwxh = iWidth * iHeight;
 
-            //  length of comparison window
-            var ihwl = (2 * iDWin + 1);
-            var iwl = (2 * iDWin + 1) * (2 * iDWin + 1);
+            // length of comparison window
+            var ihwl = ((2 * iDWin) + 1);
+            var iwl = ((2 * iDWin) + 1) * ((2 * iDWin) + 1);
             var icwl = iChannels * iwl;
 
             // filtering parameter
@@ -68,7 +61,7 @@ namespace NLMRunner.NLM
             // tabulate exp(-x), faster than using directly function expf
             var iLutLength = (int)Math.Round(LUTMAX * LUTPRECISION);
             var fpLut = new float[iLutLength];
-            wxFillExpLut(fpLut, iLutLength);
+            this.wxFillExpLut(fpLut, iLutLength);
 
             // auxiliary variable
             // number of denoised values per pixel
@@ -96,7 +89,7 @@ namespace NLMRunner.NLM
                     var imax = Math.Min(x + iDBloc, iWidth - 1 - iDWin0);
                     var jmax = Math.Min(y + iDBloc, iHeight - 1 - iDWin0);
 
-                    //  clear current denoised patch
+                    // clear current denoised patch
                     for (var ii = 0; ii < iChannels; ii++)
                     {
                         for (var iii = 0; iii < iwl; iii++)
@@ -117,23 +110,25 @@ namespace NLMRunner.NLM
                         {
                             if (i != x || j != y)
                             {
-                                var fDif = fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth);
+                                var fDif = this.fiL2FloatDist(fpI, fpI, x, y, i, j, iDWin0, iChannels, iWidth, iWidth);
 
                                 // dif^2 - 2 * fSigma^2 * N      dif is not normalized
-                                fDif = Math.Max(fDif - 2.0f * (float)icwl * fSigma2, 0.0f);
+                                fDif = Math.Max(fDif - (2.0f * (float)icwl * fSigma2), 0.0f);
                                 fDif = fDif / fH2;
 
-                                var fWeight = wxSLUT(fDif, fpLut);
+                                var fWeight = this.wxSLUT(fDif, fpLut);
 
-                                if (fWeight > fMaxWeight) fMaxWeight = fWeight;
+                                if (fWeight > fMaxWeight)
+                                {
+                                    fMaxWeight = fWeight;
+                                }
 
                                 fTotalWeight += fWeight;
 
-
                                 for (var @is = -iDWin0; @is <= iDWin0; @is++)
                                 {
-                                    var aiindex = (iDWin + @is) * ihwl + iDWin;
-                                    var ail = (j + @is) * iWidth + i;
+                                    var aiindex = ((iDWin + @is) * ihwl) + iDWin;
+                                    var ail = ((j + @is) * iWidth) + i;
 
                                     for (var ir = -iDWin0; ir <= iDWin0; ir++)
                                     {
@@ -153,8 +148,8 @@ namespace NLMRunner.NLM
                     // current patch with fMaxWeight
                     for (var @is = -iDWin0; @is <= iDWin0; @is++)
                     {
-                        var aiindex = (iDWin + @is) * ihwl + iDWin;
-                        var ail = (y + @is) * iWidth + x;
+                        var aiindex = ((iDWin + @is) * ihwl) + iDWin;
+                        var ail = ((y + @is) * iWidth) + x;
 
                         for (var ir = -iDWin0; ir <= iDWin0; ir++)
                         {
@@ -175,8 +170,8 @@ namespace NLMRunner.NLM
                     {
                         for (var @is = -iDWin0; @is <= iDWin0; @is++)
                         {
-                            var aiindex = (iDWin + @is) * ihwl + iDWin;
-                            var ail = (y + @is) * iWidth + x;
+                            var aiindex = ((iDWin + @is) * ihwl) + iDWin;
+                            var ail = ((y + @is) * iWidth) + x;
 
                             for (var ir = -iDWin0; ir <= iDWin0; ir++)
                             {
@@ -191,7 +186,6 @@ namespace NLMRunner.NLM
                                 }
                             }
                         }
-
                     }
                 }
             });
@@ -235,7 +229,7 @@ namespace NLMRunner.NLM
             var y1 = lut[x];
             var y2 = lut[x + 1];
 
-            return y1 + (y2 - y1) * (dif * LUTPRECISION - x);
+            return y1 + ((y2 - y1) * ((dif * LUTPRECISION) - x));
         }
 
         private float fiL2FloatDist(float** u0, float** u1, int i0, int j0, int i1, int j1, int radius, int channels, int width0, int width1)
@@ -244,7 +238,7 @@ namespace NLMRunner.NLM
 
             for (var ii = 0; ii < channels; ii++)
             {
-                dif += fiL2FloatDist(u0[ii], u1[ii], i0, j0, i1, j1, radius, width0, width1);
+                dif += this.fiL2FloatDist(u0[ii], u1[ii], i0, j0, i1, j1, radius, width0, width1);
             }
 
             return dif;
@@ -255,16 +249,16 @@ namespace NLMRunner.NLM
             var dist = 0.0f;
             for (int s = -radius; s <= radius; s++)
             {
-                var l = (j0 + s) * width0 + (i0 - radius);
+                var l = ((j0 + s) * width0) + (i0 - radius);
                 var ptr0 = &u0[l];
 
-                l = (j1 + s) * width1 + (i1 - radius);
+                l = ((j1 + s) * width1) + (i1 - radius);
                 var ptr1 = &u1[l];
 
                 for (var r = -radius; r <= radius; r++, ptr0++, ptr1++)
                 {
-                    var dif = (*ptr0 - *ptr1);
-                    dist += (dif * dif);
+                    var dif = *ptr0 - *ptr1;
+                    dist += dif * dif;
                 }
             }
 
