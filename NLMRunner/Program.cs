@@ -22,11 +22,14 @@
             var clientPipe = new ClientPipe(".", "testpipe", x => x.StartByteReaderAsync());
             clientPipe.DataReceived += (sndr, args) =>
             {
+                Console.WriteLine("Odbieram dane...");
                 config = JsonConvert.DeserializeObject<RunConfigDto>(args.String);
-                Console.WriteLine("Odebrano konfigurację");
+                Console.WriteLine("Odczytałem konfigurację");
             };
 
+            Console.WriteLine("Próbuję połączyć się z serwerem...");
             clientPipe.Connect();
+            Console.WriteLine("Połączyłem się");
 
             while (config == null)
             {
@@ -46,9 +49,12 @@
                     var inputModel = BitmapModel.Create(input);
                     var outputModel = BitmapModel.Create(inputModel.Width, inputModel.Height, inputModel.PixelFormat);
 
+                    Console.WriteLine("Rozpoczynam działanie filtra... (wciśnij klawisz)");
+                    Console.ReadKey();
                     var watch = Stopwatch.StartNew();
                     implementation.RunDenoise(inputModel.Data, outputModel.Data, config.Sigma, inputModel.Channels, inputModel.Width, inputModel.Height);
                     watch.Stop();
+                    Console.WriteLine("Przefiltrowałem");
 
                     var output = outputModel.ToBitmap();
                     using (var outputFile = new MemoryStream())
@@ -62,13 +68,17 @@
             }
             catch (Exception exception)
             {
+                Console.WriteLine("Złapałem wyjątek");
                 result.Exception = exception;
             }
             finally
             {
+                Console.WriteLine("Odsyłam wyniki...");
                 var resultSerialized = JsonConvert.SerializeObject(result, Formatting.None);
+                clientPipe.Flush();
                 await clientPipe.WriteString(resultSerialized);
-                Console.WriteLine("Odesłano wyniki");
+                clientPipe.Flush();
+                Console.WriteLine("Skończyłem");
             }
         }
     }

@@ -83,7 +83,7 @@ namespace NLMBaseGUI.Views
             };
 
             var fileNames = await dialog.ShowAsync(this);
-            interaction.SetOutput(fileNames.FirstOrDefault());
+            interaction.SetOutput(fileNames?.FirstOrDefault());
         }
 
         private async Task ShowSaveImageDialog(InteractionContext<Unit, string> interaction)
@@ -117,7 +117,7 @@ namespace NLMBaseGUI.Views
                 .GetMessageBoxStandardWindow(new MessageBoxStandardParams
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
-                    ContentTitle = "Wyj¹tek",
+                    ContentTitle = "Wyjï¿½tek",
                     ContentMessage = interaction.Input.ToString(),
                     Icon = global::MessageBox.Avalonia.Enums.Icon.Error,
                 });

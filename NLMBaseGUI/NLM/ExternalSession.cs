@@ -46,11 +46,27 @@
             var serverPipe = new ServerPipe("testpipe", x => x.StartByteReaderAsync());
             serverPipe.Connected += async (sndr, args) =>
             {
-                await serverPipe.WriteString(configSerialized);
+                try
+                {
+                    serverPipe.Flush();
+                    await serverPipe.WriteString(configSerialized);
+                    serverPipe.Flush();
+                }
+                catch (Exception exception)
+                {
+                    runnerException = exception;
+                }
             };
             serverPipe.DataReceived += (sndr, args) =>
             {
-                runResult = JsonConvert.DeserializeObject<RunResultDto>(args.String);
+                try
+                {
+                    runResult = JsonConvert.DeserializeObject<RunResultDto>(args.String);
+                }
+                catch (Exception exception)
+                {
+                    runnerException = exception;
+                }
             };
             serverPipe.PipeClosed += (sndr, args) =>
             {
