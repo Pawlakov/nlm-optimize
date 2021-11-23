@@ -11,6 +11,13 @@
             this.String = Encoding.UTF8.GetString(data).TrimEnd('\0');
         }
 
+        public PipeEventArgs(object obj)
+        {
+            this.ObjectData = obj;
+        }
+
+        public object ObjectData { get; protected set; }
+
         public byte[] Data { get; protected set; }
 
         public string String { get; protected set; }

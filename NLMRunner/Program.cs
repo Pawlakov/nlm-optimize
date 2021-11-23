@@ -19,12 +19,11 @@
             var config = (RunConfigDto)null;
             var result = new RunResultDto();
 
-            var clientPipe = new ClientPipe(".", "testpipe", x => x.StartByteReaderAsync());
+            var clientPipe = new ClientPipe(".", "testpipe", x => x.StartObjectReaderAsync());
             clientPipe.DataReceived += (sndr, args) =>
             {
-                Console.WriteLine("Odbieram dane...");
-                config = JsonConvert.DeserializeObject<RunConfigDto>(args.String);
-                Console.WriteLine("Odczytałem konfigurację");
+                config = (RunConfigDto)args.ObjectData;
+                Console.WriteLine("Odebrałęm konfigurację");
             };
 
             Console.WriteLine("Próbuję połączyć się z serwerem...");
@@ -41,7 +40,7 @@
                 using (var implementation = (IImplementation)(implementationFile != null ? new ExternalImplementation(implementationFile) : new DefaultImplementation()))
                 {
                     var input = (Bitmap)null;
-                    using (var inputFile = new MemoryStream(Convert.FromBase64String(config.InputFile)))
+                    using (var inputFile = new MemoryStream(config.InputFile))
                     {
                         input = new Bitmap(inputFile);
                     }
@@ -49,18 +48,17 @@
                     var inputModel = BitmapModel.Create(input);
                     var outputModel = BitmapModel.Create(inputModel.Width, inputModel.Height, inputModel.PixelFormat);
 
-                    Console.WriteLine("Rozpoczynam działanie filtra... (wciśnij klawisz)");
-                    Console.ReadKey();
+                    Console.WriteLine("Rozpoczynam działanie filtra...");
                     var watch = Stopwatch.StartNew();
                     implementation.RunDenoise(inputModel.Data, outputModel.Data, config.Sigma, inputModel.Channels, inputModel.Width, inputModel.Height);
                     watch.Stop();
-                    Console.WriteLine("Przefiltrowałem");
+                    Console.WriteLine($"Przefiltrowałem ({TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)})");
 
                     var output = outputModel.ToBitmap();
                     using (var outputFile = new MemoryStream())
                     {
                         output.Save(outputFile, ImageFormat.Png);
-                        result.OutputFile = Convert.ToBase64String(outputFile.ToArray());
+                        result.OutputFile = outputFile.ToArray();
                     }
 
                     result.Time = watch.ElapsedMilliseconds;
@@ -74,11 +72,12 @@
             finally
             {
                 Console.WriteLine("Odsyłam wyniki...");
-                var resultSerialized = JsonConvert.SerializeObject(result, Formatting.None);
+                var watch = Stopwatch.StartNew();
                 clientPipe.Flush();
-                await clientPipe.WriteString(resultSerialized);
+                await clientPipe.WriteObject(result);
                 clientPipe.Flush();
-                Console.WriteLine("Skończyłem");
+                watch.Stop();
+                Console.WriteLine($"Odesłałem ({TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)})");
             }
         }
     }

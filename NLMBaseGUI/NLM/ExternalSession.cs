@@ -39,17 +39,16 @@
             var runnerException = (Exception)null;
 
             var runConfig = this.PrepareConfig();
-            var configSerialized = JsonConvert.SerializeObject(runConfig, Formatting.None);
 
             var runResult = (RunResultDto)null;
 
-            var serverPipe = new ServerPipe("testpipe", x => x.StartByteReaderAsync());
+            var serverPipe = new ServerPipe("testpipe", x => x.StartObjectReaderAsync());
             serverPipe.Connected += async (sndr, args) =>
             {
                 try
                 {
                     serverPipe.Flush();
-                    await serverPipe.WriteString(configSerialized);
+                    await serverPipe.WriteObject(runConfig);
                     serverPipe.Flush();
                 }
                 catch (Exception exception)
@@ -59,42 +58,7 @@
             };
             serverPipe.DataReceived += (sndr, args) =>
             {
-                try
-                {
-                    runResult = JsonConvert.DeserializeObject<RunResultDto>(args.String);
-                }
-                catch (Exception exception)
-                {
-                    runnerException = exception;
-                }
-            };
-            serverPipe.PipeClosed += (sndr, args) =>
-            {
-                this.runnerProcess.WaitForExit();
-                this.runnerProcess.Close();
-
-                if (runResult != null)
-                {
-                    if (runResult.Exception != null)
-                    {
-                        runnerException = runResult.Exception;
-                    }
-                    else
-                    {
-                        using (var filteredFile = new MemoryStream(Convert.FromBase64String(runResult.OutputFile)))
-                        {
-                            filtered = new Bitmap(filteredFile);
-                        }
-
-                        stats = this.CalculateStats(raw, filtered, runResult.Time);
-                    }
-                }
-                else if (!this.cancelled)
-                {
-                    runnerException = new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
-                }
-
-                runnerExited = true;
+                runResult = (RunResultDto)args.ObjectData;
             };
 
             this.runnerProcess = Process.Start(new ProcessStartInfo
@@ -108,12 +72,30 @@
 #endif
             });
 
-            await Task.Run(() =>
+            await this.runnerProcess.WaitForExitAsync();
+
+            if (runResult != null)
             {
-                while (!runnerExited)
+                if (runResult.Exception != null)
                 {
+                    runnerException = runResult.Exception;
                 }
-            });
+                else
+                {
+                    using (var filteredFile = new MemoryStream(runResult.OutputFile))
+                    {
+                        filtered = new Bitmap(filteredFile);
+                    }
+
+                    stats = this.CalculateStats(raw, filtered, runResult.Time);
+                }
+            }
+            else if (!this.cancelled)
+            {
+                runnerException = new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
+            }
+
+            runnerExited = true;
 
             if (runnerException != null)
             {
@@ -148,7 +130,7 @@
             using (var inputFile = new MemoryStream())
             {
                 this.input.Save(inputFile, ImageFormat.Png);
-                config.InputFile = Convert.ToBase64String(inputFile.ToArray());
+                config.InputFile = inputFile.ToArray();
             }
 
             return config;
