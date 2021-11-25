@@ -5,23 +5,18 @@
 
     public class PipeEventArgs
     {
-        public PipeEventArgs(byte[] data)
-        {
-            this.Data = data;
-            this.String = Encoding.UTF8.GetString(data).TrimEnd('\0');
-        }
-
         public PipeEventArgs(object obj)
         {
             this.ObjectData = obj;
         }
 
+        public PipeEventArgs(Exception exception)
+        {
+            this.Error = exception;
+        }
+
         public object ObjectData { get; protected set; }
 
-        public byte[] Data { get; protected set; }
-
-        public string String { get; protected set; }
-
-        public int Len => this.Data?.Length ?? 0;
+        public Exception Error { get; protected set; }
     }
 }

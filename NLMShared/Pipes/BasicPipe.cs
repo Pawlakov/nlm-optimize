@@ -26,9 +26,16 @@
 
         public void StartObjectReaderAsync()
         {
-            var f = new BinaryFormatter();
-            var messageReceived = f.Deserialize(this.PipeStream);
-            this.DataReceived?.Invoke(this, new PipeEventArgs(messageReceived));
+            try
+            {
+                var f = new BinaryFormatter();
+                var messageReceived = f.Deserialize(this.PipeStream);
+                this.DataReceived?.Invoke(this, new PipeEventArgs(messageReceived));
+            }
+            catch (Exception exception)
+            {
+                this.DataReceived?.Invoke(this, new PipeEventArgs(exception));
+            }
         }
 
         public void Flush()

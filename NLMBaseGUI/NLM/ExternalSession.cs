@@ -58,7 +58,14 @@
             };
             serverPipe.DataReceived += (sndr, args) =>
             {
-                runResult = (RunResultDto)args.ObjectData;
+                if (args.Error == null)
+                {
+                    runResult = (RunResultDto)args.ObjectData;
+                }
+                else
+                {
+                    runnerException = args.Error;
+                }
             };
 
             this.runnerProcess = Process.Start(new ProcessStartInfo

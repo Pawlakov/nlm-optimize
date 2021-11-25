@@ -76,15 +76,21 @@
 
         private void Noise(float[] inputPointer, float[] outputPointer, int sigma, int channels, int width, int height)
         {
+            var randomLock = new object();
             var random = Randoms.Create(DateTime.Now.Millisecond + Thread.CurrentThread.ManagedThreadId, RandomType.FastestDouble);
             var size = width * height * channels;
-            for (var i = 0; i < size; ++i)
+            Parallel.For(0, size, (i, state) =>
             {
-                var a = random.NextDouble();
-                var b = random.NextDouble();
+                double a, b;
+                lock (randomLock)
+                {
+                    a = random.NextDouble();
+                    b = random.NextDouble();
+                }
+
                 var noise = (float)(sigma * Math.Sqrt(-2.0 * Math.Log(a)) * Math.Cos(2.0 * Math.PI * b));
                 outputPointer[i] = (float)inputPointer[i] + noise;
-            }
+            });
         }
     }
 }
