@@ -50,7 +50,7 @@
 
                     Console.WriteLine("Rozpoczynam działanie filtra...");
                     var watch = Stopwatch.StartNew();
-                    implementation.RunDenoise(inputModel.Data, outputModel.Data, config.Sigma, inputModel.Channels, inputModel.Width, inputModel.Height);
+                    implementation.RunDenoise(inputModel.Data, outputModel.Data, config.Params, inputModel.Channels, inputModel.Width, inputModel.Height);
                     watch.Stop();
                     Console.WriteLine($"Przefiltrowałem ({TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)})");
 

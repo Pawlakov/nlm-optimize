@@ -15,9 +15,9 @@
 
     public unsafe class FilterService
     {
-        public ISession SetUp(ImplementationModel library, Bitmap noisy, int sigma)
+        public ISession SetUp(ImplementationModel library, Bitmap noisy, int sigma, int windowRadius, int blockRadius, float filterParam)
         {
-            return new ExternalSession(sigma, noisy, library.File?.FullName);
+            return new ExternalSession(sigma, windowRadius, blockRadius, filterParam, noisy, library.File?.FullName);
         }
     }
 }

@@ -6,8 +6,11 @@
     using System.Text;
     using System.Threading.Tasks;
 
+    [Serializable]
     public class NLMParamsModel
     {
+        public int Sigma { get; set; }
+
         public int Win { get; set; }
 
         public int Bloc { get; set; }

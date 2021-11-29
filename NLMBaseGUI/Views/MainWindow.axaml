@@ -3,6 +3,7 @@
                      xmlns:vm="using:NLMBaseGUI.ViewModels"
                      xmlns:conv="using:NLMBaseGUI.Converters"
                      xmlns:behav="using:NLMBaseGUI.Behaviors"
+                     xmlns:rxuialt="using:ReactiveUI"
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:rxui="http://reactiveui.net"
@@ -11,7 +12,7 @@
                      x:Class="NLMBaseGUI.Views.MainWindow"
                      x:TypeArguments="vm:MainWindowViewModel"
                      Icon="/Assets/avalonia-logo.ico"
-					 SizeToContent="WidthAndHeight"
+                     SizeToContent="WidthAndHeight"
                      Title="NLMBaseGUI">
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -22,7 +23,7 @@
     <Window.Styles>
         <Style Selector="Border.ImagePlaceholder">
             <Setter Property="Background" Value="LightGray"/>
-            <Setter Property="Height" Value="512"/>
+            <Setter Property="Height" Value="384"/>
             <Setter Property="Margin" Value="4"/>
         </Style>
         <Style Selector="Border.Frame">
@@ -33,7 +34,7 @@
         </Style>
         <Style Selector="Image.PreviewImage">
             <Setter Property="Margin" Value="4"/>
-            <Setter Property="Height" Value="512"/>
+            <Setter Property="Height" Value="384"/>
         </Style>
         <Style Selector="Button.Margin">
             <Setter Property="Margin" Value="4"/>
@@ -89,29 +90,29 @@
                                 </Border>
                             </StackPanel>
                         </Border>
-						<Border Classes="Frame" IsVisible="{Binding NoisingStats, Converter={x:Static ObjectConverters.IsNotNull}}">
-							<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-								<StackPanel Orientation="Horizontal">
-									<TextBlock Text="Czas wykonania: "/>
-									<TextBlock Text="{Binding NoisingStats.Time}"/>
-								</StackPanel>
-								<StackPanel Orientation="Horizontal" IsVisible="{Binding NoisingStats.MSE, Converter={x:Static ObjectConverters.IsNotNull}}">
-									<TextBlock Text="MSE: "/>
-									<TextBlock Text="{Binding NoisingStats.MSE}"/>
-								</StackPanel>
-								<StackPanel Orientation="Horizontal" IsVisible="{Binding NoisingStats.SSIM, Converter={x:Static ObjectConverters.IsNotNull}}">
-									<TextBlock Text="SSIM: "/>
-									<TextBlock Text="{Binding NoisingStats.SSIM}"/>
-								</StackPanel>
-							</StackPanel>
-						</Border>
-						<Border Classes="Frame">
-							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-								<Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
-								<Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
-								<Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
-							</StackPanel>
-						</Border>
+                        <Border Classes="Frame" IsVisible="{Binding NoisingStats, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Czas wykonania: "/>
+                                    <TextBlock Text="{Binding NoisingStats.Time}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding NoisingStats.MSE, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="MSE: "/>
+                                    <TextBlock Text="{Binding NoisingStats.MSE}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding NoisingStats.SSIM, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="SSIM: "/>
+                                    <TextBlock Text="{Binding NoisingStats.SSIM}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="Frame">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
+                                <Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
+                                <Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </TabItem>
                 <TabItem Header="Odfiltrowany" VerticalContentAlignment="Center">
@@ -126,74 +127,102 @@
                                 </Border>
                             </StackPanel>
                         </Border>
-						<Border Classes="Frame" IsVisible="{Binding FilteringStats, Converter={x:Static ObjectConverters.IsNotNull}}">
-							<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-								<StackPanel Orientation="Horizontal">
-									<TextBlock Text="Czas wykonania: "/>
-									<TextBlock Text="{Binding FilteringStats.Time}"/>
-								</StackPanel>
-								<StackPanel Orientation="Horizontal" IsVisible="{Binding FilteringStats.MSE, Converter={x:Static ObjectConverters.IsNotNull}}">
-									<TextBlock Text="MSE: "/>
-									<TextBlock Text="{Binding FilteringStats.MSE}"/>
-								</StackPanel>
-								<StackPanel Orientation="Horizontal" IsVisible="{Binding FilteringStats.SSIM, Converter={x:Static ObjectConverters.IsNotNull}}">
-									<TextBlock Text="SSIM: "/>
-									<TextBlock Text="{Binding FilteringStats.SSIM}"/>
-								</StackPanel>
-							</StackPanel>
-						</Border>
-						<Border Classes="Frame">
-							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-								<Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
-							</StackPanel>
-						</Border>
+                        <Border Classes="Frame" IsVisible="{Binding FilteringStats, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Czas wykonania: "/>
+                                    <TextBlock Text="{Binding FilteringStats.Time}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding FilteringStats.MSE, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="MSE: "/>
+                                    <TextBlock Text="{Binding FilteringStats.MSE}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding FilteringStats.SSIM, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="SSIM: "/>
+                                    <TextBlock Text="{Binding FilteringStats.SSIM}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="Frame">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Classes="Margin" Command="{Binding SaveFilteredCommand}" Content="Zapisz"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </TabItem>
             </TabControl>
             <Border Classes="Frame" Margin="24,4,24,4">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Sigma"/>
-                        <TextBox Classes="Margin">
-                            <Interaction.Behaviors>
-                                <behav:LostFocusUpdateBindingBehavior Text="{Binding Sigma}"/>
-                            </Interaction.Behaviors>
-                        </TextBox>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Sigma"/>
+                            <TextBox Classes="Margin">
+                                <Interaction.Behaviors>
+                                    <behav:LostFocusUpdateBindingBehavior Text="{Binding Sigma}"/>
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Parametr filtra"/>
+                            <TextBox Classes="Margin" IsEnabled="False">
+								<Interaction.Behaviors>
+									<behav:LostFocusUpdateBindingBehavior Text="{Binding FilterParam}"/>
+								</Interaction.Behaviors>
+							</TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Promień okna"/>
+                            <TextBox Classes="Margin" IsEnabled="False">
+								<Interaction.Behaviors>
+									<behav:LostFocusUpdateBindingBehavior Text="{Binding WindowRadius}"/>
+								</Interaction.Behaviors>
+							</TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Promień bloku"/>
+                            <TextBox Classes="Margin" IsEnabled="False">
+								<Interaction.Behaviors>
+									<behav:LostFocusUpdateBindingBehavior Text="{Binding BlockRadius}"/>
+								</Interaction.Behaviors>
+							</TextBox>
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Implementacja"/>
-						<StackPanel Orientation="Horizontal">
-							<ComboBox Classes="Margin" 
-									  Items="{Binding ImplementationOptions}"
-									  SelectedItem="{Binding Implementation}">
-								<ComboBox.ItemTemplate>
-									<DataTemplate>
-										<TextBlock Text="{Binding Name}"/>
-									</DataTemplate>
-								</ComboBox.ItemTemplate>
-							</ComboBox>
-							<Button Classes="Margin" Command="{Binding LoadImplementationCommand}" Content="Załaduj"/>
-						</StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Implementacja"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Classes="Margin" Command="{Binding LoadImplementationCommand}" Content="Wczytaj"/>
+                                <ComboBox Classes="Margin"
+                                          Items="{Binding ImplementationOptions}"
+                                          SelectedItem="{Binding Implementation}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
         </StackPanel>
-		<Grid Grid.Column="0" Grid.Row="0" IsVisible="{Binding IsProcessing}">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition/>
-				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition/>
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition/>
-			</Grid.RowDefinitions>
-			<Border Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="3" DockPanel.Dock="Top" Background="DarkGray" Opacity="0.3">
-			</Border>
-			<Border Grid.Column="1" Grid.Row="1" Classes="Frame" Background="White">
-				<Button Classes="Margin" Command="{Binding CancelTaskCommand}" Content="Zatrzymaj"/>
-			</Border>
-		</Grid>
+        <Grid Grid.Column="0" Grid.Row="0" IsVisible="{Binding IsProcessing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="3" DockPanel.Dock="Top" Background="DarkGray" Opacity="0.3">
+            </Border>
+            <Border Grid.Column="1" Grid.Row="1" Classes="Frame" Background="White">
+                <Button Classes="Margin" Command="{Binding CancelTaskCommand}" Content="Zatrzymaj"/>
+            </Border>
+        </Grid>
     </Grid>
 </rxui:ReactiveWindow>

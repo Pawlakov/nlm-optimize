@@ -3,10 +3,11 @@
     using System;
     using System.IO;
     using System.Runtime.InteropServices;
+    using NLMShared.Models;
     using NLMShared.NLM;
 
     public class ExternalImplementation
-        : BaseImplementation, IImplementation
+        : IImplementation
     {
         private const string Symbol = "_Z7DenoiseiiffPPfS0_iii";
 
@@ -20,10 +21,8 @@
             this.function = Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(DenoiseFunction)) as DenoiseFunction;
         }
 
-        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
+        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, NLMParamsModel nlmParams, int channels, int width, int height)
         {
-            var nlmParams = this.MakeParams(sigma, channels);
-
             fixed (float* inputFlatPointer = &inputArray[0], outputFlatPointer = &outputArray[0])
             {
                 var fpI = new float*[channels];
@@ -36,12 +35,12 @@
 
                 fixed (float** inputPointer = &fpI[0], outputPointer = &fpO[0])
                 {
-                    this.function(nlmParams.Win, nlmParams.Bloc, sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height);
+                    this.function(nlmParams.Win, nlmParams.Bloc, nlmParams.Sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height);
                 }
             }
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             if (this.libraryHandle != IntPtr.Zero)
             {

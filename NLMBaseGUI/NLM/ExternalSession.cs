@@ -13,20 +13,27 @@
     using Newtonsoft.Json;
     using NLMBaseGUI.Models;
     using NLMShared.Dtos;
+    using NLMShared.Models;
     using NLMShared.Pipes;
 
     public class ExternalSession
         : BaseSession
     {
         private int sigma;
+        private int windowRadius;
+        private int blockRadius;
+        private float filterParam;
         private Bitmap input;
         private string libraryPath;
         private Process runnerProcess;
         private bool cancelled;
 
-        public ExternalSession(int sigma, Bitmap input, string libraryPath)
+        public ExternalSession(int sigma, int windowRadius, int blockRadius, float filterParam, Bitmap input, string libraryPath)
         {
             this.sigma = sigma;
+            this.windowRadius = windowRadius;
+            this.blockRadius = blockRadius;
+            this.filterParam = filterParam;
             this.input = input;
             this.libraryPath = libraryPath;
         }
@@ -130,8 +137,14 @@
         {
             var config = new RunConfigDto
             {
-                Sigma = this.sigma,
                 LibraryPath = this.libraryPath,
+                Params = new NLMParamsModel
+                {
+                    Sigma = this.sigma,
+                    Bloc = this.blockRadius,
+                    FiltPar = this.filterParam,
+                    Win = this.windowRadius,
+                },
             };
 
             using (var inputFile = new MemoryStream())

@@ -3,10 +3,11 @@ namespace NLMRunner.NLM
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using NLMShared.Models;
     using NLMShared.NLM;
 
     public unsafe class DefaultImplementation
-        : BaseImplementation, IImplementation
+        : IImplementation
     {
         private const float LUTMAX = 30.0f;
         private const float LUTMAXM1 = 29.0f;
@@ -15,10 +16,8 @@ namespace NLMRunner.NLM
         private const float fTiny = 0.00000001f;
         private const float fLarge = 100000000.0f;
 
-        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, int sigma, int channels, int width, int height)
+        public unsafe void RunDenoise(float[] inputArray, float[] outputArray, NLMParamsModel nlmParams, int channels, int width, int height)
         {
-            var nlmParams = this.MakeParams(sigma, channels);
-
             fixed (float* inputFlatPointer = &inputArray[0], outputFlatPointer = &outputArray[0])
             {
                 var fpI = new float*[channels];
@@ -31,12 +30,12 @@ namespace NLMRunner.NLM
 
                 fixed (float** inputPointer = &fpI[0], outputPointer = &fpO[0])
                 {
-                    this.DenoiseBody(nlmParams.Win, nlmParams.Bloc, sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height);
+                    this.DenoiseBody(nlmParams.Win, nlmParams.Bloc, nlmParams.Sigma, nlmParams.FiltPar, inputPointer, outputPointer, channels, width, height);
                 }
             }
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
         }
 

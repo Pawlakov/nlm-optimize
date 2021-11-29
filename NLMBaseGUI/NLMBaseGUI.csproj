@@ -20,15 +20,15 @@
 		<AvaloniaResource Include="Assets\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="0.10.8" />
-		<PackageReference Include="Avalonia.Desktop" Version="0.10.8" />
-		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.8" />
-		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.8" />
-		<PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.8" />
+		<PackageReference Include="Avalonia" Version="0.10.10" />
+		<PackageReference Include="Avalonia.Desktop" Version="0.10.10" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.10" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.10" />
+		<PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.10.4" />
 		<PackageReference Include="MersenneTwister" Version="1.0.6" />
-		<PackageReference Include="MessageBox.Avalonia" Version="1.5.3" />
+		<PackageReference Include="MessageBox.Avalonia" Version="1.5.5" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="3.2.0" />
+		<PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="3.7.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

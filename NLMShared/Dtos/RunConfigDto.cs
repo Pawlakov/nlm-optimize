@@ -1,11 +1,12 @@
 ﻿namespace NLMShared.Dtos
 {
     using System;
+    using NLMShared.Models;
 
     [Serializable]
     public class RunConfigDto
     {
-        public int Sigma { get; set; }
+        public NLMParamsModel Params { get; set; }
 
         public byte[] InputFile { get; set; }
 

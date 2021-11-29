@@ -30,6 +30,9 @@ namespace NLMBaseGUI.ViewModels
         private Bitmap noisyImage;
         private Bitmap filteredImage;
         private int sigma;
+        private float filterParam;
+        private int windowRadius;
+        private int blockRadius;
         private ImplementationModel implementation;
         private FilteringStatsModel noisingStats;
         private FilteringStatsModel filteringStats;
@@ -81,7 +84,11 @@ namespace NLMBaseGUI.ViewModels
         public Bitmap NoisyImage
         {
             get => this.noisyImage;
-            set => this.RaiseAndSetIfChanged(ref this.noisyImage, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref this.noisyImage, value);
+                this.UpdateFilterParams();
+            }
         }
 
         public Bitmap FilteredImage
@@ -107,6 +114,49 @@ namespace NLMBaseGUI.ViewModels
                     }
 
                     this.sigma = parsed;
+                }
+
+                this.RaisePropertyChanged();
+                this.UpdateFilterParams();
+            }
+        }
+
+        public string FilterParam
+        {
+            get => this.filterParam.ToString();
+            set
+            {
+                if (float.TryParse(value, out var parsed))
+                {
+                    this.filterParam = parsed;
+                }
+
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public string WindowRadius
+        {
+            get => this.windowRadius.ToString();
+            set
+            {
+                if (int.TryParse(value, out var parsed))
+                {
+                    this.windowRadius = parsed;
+                }
+
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public string BlockRadius
+        {
+            get => this.blockRadius.ToString();
+            set
+            {
+                if (int.TryParse(value, out var parsed))
+                {
+                    this.blockRadius = parsed;
                 }
 
                 this.RaisePropertyChanged();
@@ -313,7 +363,7 @@ namespace NLMBaseGUI.ViewModels
                 this.IsProcessing = true;
                 if (this.noisyImage != null)
                 {
-                    this.CurrentSesstion = this.filterService.SetUp(this.implementation, this.noisyImage, this.sigma);
+                    this.CurrentSesstion = this.filterService.SetUp(this.implementation, this.noisyImage, this.sigma, this.windowRadius, this.blockRadius, this.filterParam);
                     (var filteredBitmap, var filteringStats) = await this.CurrentSesstion.Run(this.rawImage);
                     this.FilteredImage = filteredBitmap;
                     this.FilteringStats = filteringStats;
@@ -427,6 +477,72 @@ namespace NLMBaseGUI.ViewModels
             {
                 this.CurrentSesstion.Cancel();
             }
+        }
+
+        private void UpdateFilterParams()
+        {
+            if (this.noisyImage != null)
+            {
+                var channels = Image.GetPixelFormatSize(this.noisyImage.PixelFormat) / 8;
+                if (channels < 3)
+                {
+                    if (this.sigma > 0 && this.sigma <= 15)
+                    {
+                        this.windowRadius = 1;
+                        this.blockRadius = 10;
+                        this.filterParam = 0.4f;
+                    }
+                    else if (this.sigma > 15 && this.sigma <= 30)
+                    {
+                        this.windowRadius = 2;
+                        this.blockRadius = 10;
+                        this.filterParam = 0.4f;
+                    }
+                    else if (this.sigma > 30 && this.sigma <= 45)
+                    {
+                        this.windowRadius = 3;
+                        this.blockRadius = 17;
+                        this.filterParam = 0.35f;
+                    }
+                    else if (this.sigma > 45 && this.sigma <= 75)
+                    {
+                        this.windowRadius = 4;
+                        this.blockRadius = 17;
+                        this.filterParam = 0.35f;
+                    }
+                    else if (this.sigma <= 100)
+                    {
+                        this.windowRadius = 5;
+                        this.blockRadius = 17;
+                        this.filterParam = 0.30f;
+                    }
+                }
+                else
+                {
+                    if (this.sigma > 0 && this.sigma <= 25)
+                    {
+                        this.windowRadius = 1;
+                        this.blockRadius = 10;
+                        this.filterParam = 0.55f;
+                    }
+                    else if (this.sigma > 25 && this.sigma <= 55)
+                    {
+                        this.windowRadius = 2;
+                        this.blockRadius = 17;
+                        this.filterParam = 0.4f;
+                    }
+                    else if (this.sigma <= 100)
+                    {
+                        this.windowRadius = 3;
+                        this.blockRadius = 17;
+                        this.filterParam = 0.35f;
+                    }
+                }
+            }
+
+            this.RaisePropertyChanged(nameof(this.WindowRadius));
+            this.RaisePropertyChanged(nameof(this.BlockRadius));
+            this.RaisePropertyChanged(nameof(this.FilterParam));
         }
     }
 }
