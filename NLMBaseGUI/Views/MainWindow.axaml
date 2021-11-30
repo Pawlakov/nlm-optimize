@@ -107,11 +107,39 @@
                             </StackPanel>
                         </Border>
                         <Border Classes="Frame">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
-                                <Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
-                                <Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
-                            </StackPanel>
+							<StackPanel Orientation="Vertical">
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="{Binding ReccomendedFilterParam, StringFormat='Parametr filtra (\{0\})'}"/>
+                                        <TextBox Classes="Margin">
+                                            <Interaction.Behaviors>
+                                                <behav:LostFocusUpdateBindingBehavior Text="{Binding FilterParam}"/>
+                                            </Interaction.Behaviors>
+                                        </TextBox>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="{Binding ReccomendedWindowRadius, StringFormat='Promień okna (\{0\})'}"/>
+                                        <TextBox Classes="Margin">
+                                            <Interaction.Behaviors>
+                                                <behav:LostFocusUpdateBindingBehavior Text="{Binding WindowRadius}"/>
+                                            </Interaction.Behaviors>
+                                        </TextBox>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="{Binding ReccomendedBlockRadius, StringFormat='Promień bloku (\{0\})'}"/>
+                                        <TextBox Classes="Margin">
+                                            <Interaction.Behaviors>
+                                                <behav:LostFocusUpdateBindingBehavior Text="{Binding BlockRadius}"/>
+                                            </Interaction.Behaviors>
+                                        </TextBox>
+                                    </StackPanel>
+                                </StackPanel>
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Classes="Margin" Command="{Binding LoadNoisyCommand}" Content="Wczytaj"/>
+                                    <Button Classes="Margin" Command="{Binding SaveNoisyCommand}" Content="Zapisz"/>
+                                    <Button Classes="Margin" Command="{Binding MakeFilteredCommand}" Content="Filtruj"/>
+                                </StackPanel>
+							</StackPanel>
                         </Border>
                     </StackPanel>
                 </TabItem>
@@ -152,8 +180,7 @@
                 </TabItem>
             </TabControl>
             <Border Classes="Frame" Margin="24,4,24,4">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Sigma"/>
                             <TextBox Classes="Margin">
@@ -162,32 +189,6 @@
                                 </Interaction.Behaviors>
                             </TextBox>
                         </StackPanel>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Parametr filtra"/>
-                            <TextBox Classes="Margin" IsEnabled="False">
-								<Interaction.Behaviors>
-									<behav:LostFocusUpdateBindingBehavior Text="{Binding FilterParam}"/>
-								</Interaction.Behaviors>
-							</TextBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Promień okna"/>
-                            <TextBox Classes="Margin" IsEnabled="False">
-								<Interaction.Behaviors>
-									<behav:LostFocusUpdateBindingBehavior Text="{Binding WindowRadius}"/>
-								</Interaction.Behaviors>
-							</TextBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Promień bloku"/>
-                            <TextBox Classes="Margin" IsEnabled="False">
-								<Interaction.Behaviors>
-									<behav:LostFocusUpdateBindingBehavior Text="{Binding BlockRadius}"/>
-								</Interaction.Behaviors>
-							</TextBox>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Implementacja"/>
                             <StackPanel Orientation="Horizontal">
@@ -204,7 +205,6 @@
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
-                </StackPanel>
             </Border>
         </StackPanel>
         <Grid Grid.Column="0" Grid.Row="0" IsVisible="{Binding IsProcessing}">

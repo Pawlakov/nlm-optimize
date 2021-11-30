@@ -33,6 +33,9 @@ namespace NLMBaseGUI.ViewModels
         private float filterParam;
         private int windowRadius;
         private int blockRadius;
+        private float reccomendedFilterParam;
+        private int reccomendedWindowRadius;
+        private int reccomendedBlockRadius;
         private ImplementationModel implementation;
         private FilteringStatsModel noisingStats;
         private FilteringStatsModel filteringStats;
@@ -87,7 +90,7 @@ namespace NLMBaseGUI.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref this.noisyImage, value);
-                this.UpdateFilterParams();
+                this.UpdateReccomendedFilterParams();
             }
         }
 
@@ -117,7 +120,7 @@ namespace NLMBaseGUI.ViewModels
                 }
 
                 this.RaisePropertyChanged();
-                this.UpdateFilterParams();
+                this.UpdateReccomendedFilterParams();
             }
         }
 
@@ -157,6 +160,48 @@ namespace NLMBaseGUI.ViewModels
                 if (int.TryParse(value, out var parsed))
                 {
                     this.blockRadius = parsed;
+                }
+
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public string ReccomendedFilterParam
+        {
+            get => this.reccomendedFilterParam.ToString();
+            set
+            {
+                if (float.TryParse(value, out var parsed))
+                {
+                    this.reccomendedFilterParam = parsed;
+                }
+
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public string ReccomendedWindowRadius
+        {
+            get => this.reccomendedWindowRadius.ToString();
+            set
+            {
+                if (int.TryParse(value, out var parsed))
+                {
+                    this.reccomendedWindowRadius = parsed;
+                }
+
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public string ReccomendedBlockRadius
+        {
+            get => this.reccomendedBlockRadius.ToString();
+            set
+            {
+                if (int.TryParse(value, out var parsed))
+                {
+                    this.reccomendedBlockRadius = parsed;
                 }
 
                 this.RaisePropertyChanged();
@@ -479,7 +524,7 @@ namespace NLMBaseGUI.ViewModels
             }
         }
 
-        private void UpdateFilterParams()
+        private void UpdateReccomendedFilterParams()
         {
             if (this.noisyImage != null)
             {
@@ -488,61 +533,61 @@ namespace NLMBaseGUI.ViewModels
                 {
                     if (this.sigma > 0 && this.sigma <= 15)
                     {
-                        this.windowRadius = 1;
-                        this.blockRadius = 10;
-                        this.filterParam = 0.4f;
+                        this.reccomendedWindowRadius = 1;
+                        this.reccomendedBlockRadius = 10;
+                        this.reccomendedFilterParam = 0.4f;
                     }
                     else if (this.sigma > 15 && this.sigma <= 30)
                     {
-                        this.windowRadius = 2;
-                        this.blockRadius = 10;
-                        this.filterParam = 0.4f;
+                        this.reccomendedWindowRadius = 2;
+                        this.reccomendedBlockRadius = 10;
+                        this.reccomendedFilterParam = 0.4f;
                     }
                     else if (this.sigma > 30 && this.sigma <= 45)
                     {
-                        this.windowRadius = 3;
-                        this.blockRadius = 17;
-                        this.filterParam = 0.35f;
+                        this.reccomendedWindowRadius = 3;
+                        this.reccomendedBlockRadius = 17;
+                        this.reccomendedFilterParam = 0.35f;
                     }
                     else if (this.sigma > 45 && this.sigma <= 75)
                     {
-                        this.windowRadius = 4;
-                        this.blockRadius = 17;
-                        this.filterParam = 0.35f;
+                        this.reccomendedWindowRadius = 4;
+                        this.reccomendedBlockRadius = 17;
+                        this.reccomendedFilterParam = 0.35f;
                     }
                     else if (this.sigma <= 100)
                     {
-                        this.windowRadius = 5;
-                        this.blockRadius = 17;
-                        this.filterParam = 0.30f;
+                        this.reccomendedWindowRadius = 5;
+                        this.reccomendedBlockRadius = 17;
+                        this.reccomendedFilterParam = 0.30f;
                     }
                 }
                 else
                 {
                     if (this.sigma > 0 && this.sigma <= 25)
                     {
-                        this.windowRadius = 1;
-                        this.blockRadius = 10;
-                        this.filterParam = 0.55f;
+                        this.reccomendedWindowRadius = 1;
+                        this.reccomendedBlockRadius = 10;
+                        this.reccomendedFilterParam = 0.55f;
                     }
                     else if (this.sigma > 25 && this.sigma <= 55)
                     {
-                        this.windowRadius = 2;
-                        this.blockRadius = 17;
-                        this.filterParam = 0.4f;
+                        this.reccomendedWindowRadius = 2;
+                        this.reccomendedBlockRadius = 17;
+                        this.reccomendedFilterParam = 0.4f;
                     }
                     else if (this.sigma <= 100)
                     {
-                        this.windowRadius = 3;
-                        this.blockRadius = 17;
-                        this.filterParam = 0.35f;
+                        this.reccomendedWindowRadius = 3;
+                        this.reccomendedBlockRadius = 17;
+                        this.reccomendedFilterParam = 0.35f;
                     }
                 }
             }
 
-            this.RaisePropertyChanged(nameof(this.WindowRadius));
-            this.RaisePropertyChanged(nameof(this.BlockRadius));
-            this.RaisePropertyChanged(nameof(this.FilterParam));
+            this.RaisePropertyChanged(nameof(this.ReccomendedWindowRadius));
+            this.RaisePropertyChanged(nameof(this.ReccomendedBlockRadius));
+            this.RaisePropertyChanged(nameof(this.ReccomendedFilterParam));
         }
     }
 }
