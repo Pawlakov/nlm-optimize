@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <iostream>
 #include "NLM.h"
 
 #define MAX(i,j) ( (i)<(j) ? (j):(i) )
