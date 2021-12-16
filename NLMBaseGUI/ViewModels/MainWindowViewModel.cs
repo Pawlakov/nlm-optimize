@@ -131,6 +131,15 @@ namespace NLMBaseGUI.ViewModels
             {
                 if (float.TryParse(value, out var parsed))
                 {
+                    if (parsed > 1)
+                    {
+                        parsed = 1.0f;
+                    }
+                    else if (parsed < 0)
+                    {
+                        parsed = 0.0f;
+                    }
+
                     this.filterParam = parsed;
                 }
 
@@ -145,6 +154,11 @@ namespace NLMBaseGUI.ViewModels
             {
                 if (int.TryParse(value, out var parsed))
                 {
+                    if (parsed < 0)
+                    {
+                        parsed = 0;
+                    }
+
                     this.windowRadius = parsed;
                 }
 
@@ -159,6 +173,11 @@ namespace NLMBaseGUI.ViewModels
             {
                 if (int.TryParse(value, out var parsed))
                 {
+                    if (parsed < 0)
+                    {
+                        parsed = 0;
+                    }
+
                     this.blockRadius = parsed;
                 }
 
@@ -588,6 +607,9 @@ namespace NLMBaseGUI.ViewModels
             this.RaisePropertyChanged(nameof(this.ReccomendedWindowRadius));
             this.RaisePropertyChanged(nameof(this.ReccomendedBlockRadius));
             this.RaisePropertyChanged(nameof(this.ReccomendedFilterParam));
+            this.WindowRadius = this.ReccomendedWindowRadius;
+            this.BlockRadius = this.ReccomendedBlockRadius;
+            this.FilterParam = this.ReccomendedFilterParam;
         }
     }
 }
