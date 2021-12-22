@@ -79,25 +79,8 @@ extern void Denoise(int iDWin, int iDBloc, float fSigma, float fFiltPar, float**
 					{
 						if (i != x || j != y)
 						{
-							struct timespec time1, time2;
-                            clock_gettime(CLOCK_MONOTONIC, &time1);
-
                             float fDif = fiL2FloatDist(fpI,fpI,x,y,i,j,iDWin0,iChannels,iWidth,iWidth);
-
-                            clock_gettime(CLOCK_MONOTONIC, &time2);
-                            if (y == 0 && x == 0)
-                            {
-                                double section1 = ((time2.tv_sec - time1.tv_sec) * 1000000000.0 + (time2.tv_nsec - time1.tv_nsec));
-                                std::cout << "Czas sekcji 1: " << section1 << "ns" << std::endl;
-                                std::cout << "x: " << x << std::endl;
-                                std::cout << "y: " << y << std::endl;
-                                std::cout << "i: " << i << std::endl;
-                                std::cout << "j: " << j << std::endl;
-                                std::cout << "iDWin0: " << iDWin0 << std::endl;
-                                std::cout << "iChannels: " << iChannels << std::endl;
-                                std::cout << "iWidth: " << iWidth << std::endl;
-                            }
-
+							
 							// dif^2 - 2 * fSigma^2 * N      dif is not normalized
 							fDif = MAX(fDif - 2.0f * (float)icwl * fSigma2, 0.0f);
 							fDif = fDif / fH2;

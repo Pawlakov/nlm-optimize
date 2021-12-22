@@ -5,10 +5,10 @@ NLMBasic: NLMBasic.so
 	rm -f NLMBasic.o NLMBasic.so
 
 NLMBasic.so: NLMBasic.o
-	g++ -shared -fopenmp -o NLMBasic.so NLMBasic.o
+	g++ -shared -fopenmp -lpng -lm -o NLMBasic.so NLMBasic.o
 
 NLMBasic.o: NLMBasic.cpp NLMBasic.h
-	g++ -c -Wall -Werror -fpic -fopenmp NLMBasic.cpp
+	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp NLMBasic.cpp
 
 .PHONY: NLMPlain
 NLMPlain: NLMPlain.so
@@ -17,10 +17,10 @@ NLMPlain: NLMPlain.so
 	rm -f NLMPlain.o NLMPlain.so
 
 NLMPlain.so: NLMPlain.o
-	g++ -shared -fopenmp -o NLMPlain.so NLMPlain.o
+	g++ -shared -fopenmp -lpng -lm -o NLMPlain.so NLMPlain.o
 
 NLMPlain.o: NLMPlain.cpp NLMPlain.h
-	g++ -c -Wall -Werror -fpic -fopenmp NLMPlain.cpp
+	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp NLMPlain.cpp
 
 .PHONY: NLMGpgpu0
 NLMGpgpu0: NLMGpgpu0.so
