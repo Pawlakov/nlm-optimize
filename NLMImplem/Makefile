@@ -5,10 +5,22 @@ NLMBasic: NLMBasic.so
 	rm -f NLMBasic.o NLMBasic.so
 
 NLMBasic.so: NLMBasic.o
-	g++ -shared -fopenmp -lpng -lm -o NLMBasic.so NLMBasic.o
+	g++ -shared -fopenmp -o NLMBasic.so NLMBasic.o
 
 NLMBasic.o: NLMBasic.cpp NLMBasic.h
-	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp NLMBasic.cpp
+	g++ -c -Wall -Wextra -fpic -fopenmp NLMBasic.cpp
+
+.PHONY: NLMBasicOpti
+NLMBasicOpti: NLMBasicOpti.so
+	cp NLMBasicOpti.so ../NLMBase
+	cp NLMBasicOpti.so ../NLMBase/bin/Release/net5.0
+	rm -f NLMBasicOpti.o NLMBasicOpti.so
+
+NLMBasicOpti.so: NLMBasicOpti.o
+	g++ -shared -fopenmp -lpng -lm -o NLMBasicOpti.so NLMBasicOpti.o
+
+NLMBasicOpti.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp -o NLMBasicOpti.o NLMBasic.cpp
 
 .PHONY: NLMPlain
 NLMPlain: NLMPlain.so
@@ -17,10 +29,22 @@ NLMPlain: NLMPlain.so
 	rm -f NLMPlain.o NLMPlain.so
 
 NLMPlain.so: NLMPlain.o
-	g++ -shared -fopenmp -lpng -lm -o NLMPlain.so NLMPlain.o
+	g++ -shared -o NLMPlain.so NLMPlain.o
 
-NLMPlain.o: NLMPlain.cpp NLMPlain.h
-	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp NLMPlain.cpp
+NLMPlain.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -Wall -Wextra -fpic -o NLMPlain.o NLMBasic.cpp
+
+.PHONY: NLMPlainOpti
+NLMPlainOpti: NLMPlainOpti.so
+	cp NLMPlainOpti.so ../NLMBase
+	cp NLMPlainOpti.so ../NLMBase/bin/Release/net5.0
+	rm -f NLMPlainOpti.o NLMPlainOpti.so
+
+NLMPlainOpti.so: NLMPlainOpti.o
+	g++ -shared -lpng -lm -o NLMPlainOpti.so NLMPlainOpti.o
+
+NLMPlainOpti.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -o NLMPlainOpti.o NLMBasic.cpp
 
 .PHONY: NLMGpgpu0
 NLMGpgpu0: NLMGpgpu0.so
@@ -32,7 +56,7 @@ NLMGpgpu0.so: NLMGpgpu0.hip.o
 	hipcc -shared -o NLMGpgpu0.so NLMGpgpu0.hip.o
 
 NLMGpgpu0.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
-	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu0.hip.cpp
+	hipcc -c -Wall -Wextra -fpic --stdlib=libstdc++ NLMGpgpu0.hip.cpp
 
 .PHONY: NLMGpgpu1
 NLMGpgpu1: NLMGpgpu1.so
@@ -44,4 +68,4 @@ NLMGpgpu1.so: NLMGpgpu1.hip.o
 	hipcc -shared -o NLMGpgpu1.so NLMGpgpu1.hip.o
 
 NLMGpgpu1.hip.o: NLMGpgpu1.hip.cpp NLMGpgpu1.hip.h
-	hipcc -c -Wall -Werror -fpic --stdlib=libstdc++ NLMGpgpu1.hip.cpp
+	hipcc -c -Wall -Wextra -fpic --stdlib=libstdc++ NLMGpgpu1.hip.cpp
