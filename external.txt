@@ -1,0 +1,24 @@
+Rozdział zawiera takie elementy jak:
+- wymagania sprzętowe i programowe,
+- sposób instalacji,
+- sposób aktywacji,
+- kategorie użytkowników,
+- sposób obsługi,
+- administracja systemem,
+- kwestie bezpieczeństwa,
+- przykład działania,
+- scenariusze korzystania z systemu (ilustrowane zrzutami ekranu lub generowanymi dokumentami).
+
+1.
+większość wymagań jest powodowana przez sprecyfikę ROCm
+jeżeli nie zamierzamy używać implementacji na rocm to część wymagań można zignorować
+1.1. Wymagania sprzętowe:
+ROCm wymaga kompatybilnej karty graficznej AMD
+kompatybilne modele można znaleźć w oficjalnej dokumentacji
+1.2. Wymagania programowe:
+co do systemu operacyjnego wymagana jest dystrybucja systemu linux - jedna z wymienionych w dokumentacji ROCm
+w przypadku niektórych dystrybucji należy też zwrócić uwagę na wersję rdzenia
+wymagany jest dotnet 5.0 - do uruchamianie wystarczy runtime a żeby skomilować potrzebny jest sdk
+dotnet do obsługi obrazów wymaga również zainstalowania biblioteki GDI+
+wymaga jest platforma ROCm po to żeby uruchamiać skompilowany program
+jeżeli chcemy skompilować implementacje używające rocm potrzebny jest HIP SDK, który powinien być zainstalowany przy pełnej instalacji ROCm
