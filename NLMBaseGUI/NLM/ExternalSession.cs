@@ -13,8 +13,10 @@
     using Newtonsoft.Json;
     using NLMBaseGUI.Models;
     using NLMShared.Dtos;
+    using NLMShared.Helpers;
     using NLMShared.Models;
     using NLMShared.Pipes;
+    using SkiaSharp;
 
     public class ExternalSession
         : BaseSession
@@ -23,12 +25,12 @@
         private int windowRadius;
         private int blockRadius;
         private float filterParam;
-        private Bitmap input;
+        private SKBitmap input;
         private string libraryPath;
         private Process runnerProcess;
         private bool cancelled;
 
-        public ExternalSession(int sigma, int windowRadius, int blockRadius, float filterParam, Bitmap input, string libraryPath)
+        public ExternalSession(int sigma, int windowRadius, int blockRadius, float filterParam, SKBitmap input, string libraryPath)
         {
             this.sigma = sigma;
             this.windowRadius = windowRadius;
@@ -38,11 +40,10 @@
             this.libraryPath = libraryPath;
         }
 
-        public override async Task<(Bitmap, FilteringStatsModel)> Run(Bitmap raw)
+        public override async Task<(SKBitmap, FilteringStatsModel)> Run(SKBitmap raw)
         {
-            var filtered = (Bitmap)null;
+            var filtered = (SKBitmap)null;
             var stats = (FilteringStatsModel)null;
-            var runnerExited = false;
             var runnerException = (Exception)null;
 
             var runConfig = this.PrepareConfig();
@@ -79,7 +80,11 @@
             {
 #if Linux
                 FileName = "dotnet",
+#if DEBUG
                 Arguments = Path.Combine("bin", "Debug", "net5.0", "NLMRunner.dll"),
+#else
+                Arguments = "NLMRunner.dll",
+#endif
                 ErrorDialog = true,
 #elif Windows
                 FileName = "NLMRunner.exe",
@@ -98,18 +103,16 @@
                 {
                     using (var filteredFile = new MemoryStream(runResult.OutputFile))
                     {
-                        filtered = new Bitmap(filteredFile);
+                        filtered = SKBitmap.Decode(filteredFile);
                     }
 
-                    stats = this.CalculateStats(raw, filtered, runResult.Time);
+                    stats = BitmapHelpers.CalculateStats(raw, filtered, runResult.Time);
                 }
             }
             else if (!this.cancelled)
             {
                 runnerException = new ApplicationException("Wystąpił niemożliwy do obsłużenia błąd krytyczny.");
             }
-
-            runnerExited = true;
 
             if (runnerException != null)
             {
@@ -149,7 +152,7 @@
 
             using (var inputFile = new MemoryStream())
             {
-                this.input.Save(inputFile, ImageFormat.Png);
+                this.input.Encode(inputFile, SKEncodedImageFormat.Png, 100);
                 config.InputFile = inputFile.ToArray();
             }
 

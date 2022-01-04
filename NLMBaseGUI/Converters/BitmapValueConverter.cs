@@ -6,6 +6,7 @@
     using System.IO;
     using Avalonia.Data.Converters;
     using Avalonia.Media.Imaging;
+    using SkiaSharp;
 
     public class BitmapValueConverter
         : IValueConverter
@@ -19,11 +20,11 @@
                 return null;
             }
 
-            if (value is System.Drawing.Bitmap input && targetType.IsAssignableFrom(typeof(Bitmap)))
+            if (value is SKBitmap input && targetType.IsAssignableFrom(typeof(Bitmap)))
             {
                 using (var outerStream = new MemoryStream())
                 {
-                    input.Save(outerStream, ImageFormat.Png);
+                    input.Encode(SKEncodedImageFormat.Png, 100).SaveTo(outerStream);
                     using (var innerStream = new MemoryStream(outerStream.ToArray()))
                     {
                         return new Bitmap(innerStream);

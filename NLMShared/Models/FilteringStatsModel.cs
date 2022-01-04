@@ -1,4 +1,4 @@
-﻿namespace NLMBaseGUI.Models
+﻿namespace NLMShared.Models
 {
     using System;
     using System.Collections.Generic;

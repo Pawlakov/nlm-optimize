@@ -9,6 +9,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using NLMShared.Helpers;
+    using SkiaSharp;
 
     public class BitmapModel
     {
@@ -24,44 +25,43 @@
 
         public int Stride { get; private set; }
 
-        public PixelFormat PixelFormat { get; private set; }
+        public SKColorType ColorType { get; private set; }
+
+        public SKAlphaType AlphaType { get; private set; }
 
         public int Length { get; private set; }
 
         public float[] Data { get; private set; }
 
-        public static BitmapModel Create(Bitmap bitmap)
+        public static BitmapModel Create(SKBitmap bitmap)
         {
             var model = new BitmapModel();
 
-            model.Width = Math.Min(bitmap.Width, bitmap.Width);
-            model.Height = Math.Min(bitmap.Height, bitmap.Height);
-            var data = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                ImageLockMode.ReadOnly,
-                bitmap.PixelFormat);
-            model.Stride = data.Stride;
-            model.PixelFormat = data.PixelFormat;
-            model.Channels = Image.GetPixelFormatSize(model.PixelFormat) / 8;
-            var origin = data.Scan0;
-            model.Length = data.Stride * data.Height;
+            model.Width = bitmap.Width;
+            model.Height = bitmap.Height;
+            model.ColorType = bitmap.ColorType;
+            model.AlphaType = bitmap.AlphaType;
+            model.Channels = model.ColorType.GetBytesPerPixel();
+            model.Length = bitmap.ByteCount;
+            model.Stride = bitmap.ByteCount / bitmap.Height;
+            var origin = bitmap.GetPixels();
             var array = new byte[model.Length];
             Marshal.Copy(origin, array, 0, model.Length);
-            bitmap.UnlockBits(data);
 
             model.Data = BitmapHelpers.UnwrapChannels(array, model.Channels, model.Width, model.Height, model.Stride);
 
             return model;
         }
 
-        public static BitmapModel Create(int width, int height, PixelFormat pixelFormat)
+        public static BitmapModel Create(int width, int height, SKColorType colorType, SKAlphaType alphaType)
         {
             var model = new BitmapModel();
 
             model.Width = width;
             model.Height = height;
-            model.PixelFormat = pixelFormat;
-            model.Channels = Image.GetPixelFormatSize(pixelFormat) / 8;
+            model.ColorType = colorType;
+            model.AlphaType = alphaType;
+            model.Channels = model.ColorType.GetBytesPerPixel();
             model.Data = new float[model.Channels * width * height];
             model.Stride = (int)(Math.Ceiling(width * model.Channels * 0.25) * 4);
             model.Length = model.Stride * model.Height;
@@ -69,9 +69,9 @@
             return model;
         }
 
-        public Bitmap ToBitmap()
+        public SKBitmap ToBitmap()
         {
-            var bitmap = new Bitmap(this.Width, this.Height, this.PixelFormat);
+            var bitmap = new SKBitmap(this.Width, this.Height, this.ColorType, this.AlphaType);
 
             var array = BitmapHelpers.WrapChannels(this.Data, this.Channels, this.Width, this.Height, this.Length, this.Stride);
             BitmapHelpers.WriteBitemapTheDumbWay(bitmap, array, this.Channels, this.Width, this.Height, this.Stride);

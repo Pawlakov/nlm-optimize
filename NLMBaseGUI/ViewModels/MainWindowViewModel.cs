@@ -16,7 +16,9 @@ namespace NLMBaseGUI.ViewModels
     using NLMBaseGUI.Models;
     using NLMBaseGUI.NLM;
     using NLMBaseGUI.Services;
+    using NLMShared.Models;
     using ReactiveUI;
+    using SkiaSharp;
 
     public class MainWindowViewModel
         : ViewModelBase
@@ -26,9 +28,9 @@ namespace NLMBaseGUI.ViewModels
 
         private bool isProcessing;
         private int selectedTab;
-        private Bitmap rawImage;
-        private Bitmap noisyImage;
-        private Bitmap filteredImage;
+        private SKBitmap rawImage;
+        private SKBitmap noisyImage;
+        private SKBitmap filteredImage;
         private int sigma;
         private float filterParam;
         private int windowRadius;
@@ -57,11 +59,11 @@ namespace NLMBaseGUI.ViewModels
             this.ShowExceptionMessageBox = new Interaction<Exception, Unit>();
 
             this.LoadRawCommand = ReactiveCommand.Create(this.LoadRaw);
-            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAnyValue(x => x.RawImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.MakeNoisyCommand = ReactiveCommand.CreateFromTask(this.MakeNoisy, this.WhenAnyValue(x => x.RawImage, (SKBitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadNoisyCommand = ReactiveCommand.Create(this.LoadNoisy);
-            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAnyValue(x => x.NoisyImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
-            this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
-            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (Bitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.SaveNoisyCommand = ReactiveCommand.Create(this.SaveNoisy, this.WhenAnyValue(x => x.NoisyImage, (SKBitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.MakeFilteredCommand = ReactiveCommand.CreateFromTask(this.MakeFiltered, this.WhenAnyValue(x => x.NoisyImage, (SKBitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
+            this.SaveFilteredCommand = ReactiveCommand.Create(this.SaveFiltered, this.WhenAnyValue(x => x.FilteredImage, (SKBitmap x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
             this.LoadImplementationCommand = ReactiveCommand.Create(this.LoadImplementation);
             this.CancelTaskCommand = ReactiveCommand.Create(this.CancelTask, this.WhenAnyValue(x => x.CurrentSesstion, (ISession x) => x != null).ObserveOn(RxApp.MainThreadScheduler));
         }
@@ -78,13 +80,13 @@ namespace NLMBaseGUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref this.selectedTab, value);
         }
 
-        public Bitmap RawImage
+        public SKBitmap RawImage
         {
             get => this.rawImage;
             set => this.RaiseAndSetIfChanged(ref this.rawImage, value);
         }
 
-        public Bitmap NoisyImage
+        public SKBitmap NoisyImage
         {
             get => this.noisyImage;
             set
@@ -94,7 +96,7 @@ namespace NLMBaseGUI.ViewModels
             }
         }
 
-        public Bitmap FilteredImage
+        public SKBitmap FilteredImage
         {
             get => this.filteredImage;
             set => this.RaiseAndSetIfChanged(ref this.filteredImage, value);
@@ -288,7 +290,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             if (x != null)
                             {
-                                this.RawImage = new Bitmap(x);
+                                this.RawImage = SKBitmap.Decode(x);
                             }
                         }
                         catch (Exception exception)
@@ -350,7 +352,7 @@ namespace NLMBaseGUI.ViewModels
                         {
                             if (x != null)
                             {
-                                this.NoisyImage = new Bitmap(x);
+                                this.NoisyImage = SKBitmap.Decode(x);
                             }
                         }
                         catch (Exception exception)
@@ -391,7 +393,12 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 if (x != null)
                                 {
-                                    this.noisyImage.Save(x);
+                                    using (var stream = File.OpenWrite(x)) 
+                                    {
+                                        var format = this.GetFileFormatFromName(x);
+                                        var data = this.noisyImage.Encode(format, 100);
+                                        data.SaveTo(stream);
+                                    }
                                 }
                             }
                             catch (Exception exception)
@@ -458,7 +465,12 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 if (x != null)
                                 {
-                                    this.filteredImage.Save(x);
+                                    using (var stream = File.OpenWrite(x)) 
+                                    {
+                                        var format = this.GetFileFormatFromName(x);
+                                        var data = this.filteredImage.Encode(format, 100);
+                                        data.SaveTo(stream);
+                                    }
                                 }
                             }
                             catch (Exception exception)
@@ -547,7 +559,7 @@ namespace NLMBaseGUI.ViewModels
         {
             if (this.noisyImage != null)
             {
-                var channels = Image.GetPixelFormatSize(this.noisyImage.PixelFormat) / 8;
+                var channels = this.noisyImage.ColorType.GetBytesPerPixel();
                 if (channels < 3)
                 {
                     if (this.sigma > 0 && this.sigma <= 15)
@@ -610,6 +622,21 @@ namespace NLMBaseGUI.ViewModels
             this.WindowRadius = this.ReccomendedWindowRadius;
             this.BlockRadius = this.ReccomendedBlockRadius;
             this.FilterParam = this.ReccomendedFilterParam;
+        }
+    
+        private SKEncodedImageFormat GetFileFormatFromName(string fileName)
+        {
+            if (fileName.EndsWith(".PNG", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return SKEncodedImageFormat.Png;
+            }
+
+            if (fileName.EndsWith(".BMP", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return SKEncodedImageFormat.Bmp;
+            }
+
+            return SKEncodedImageFormat.Jpeg;
         }
     }
 }

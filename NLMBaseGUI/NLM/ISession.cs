@@ -6,11 +6,12 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using NLMBaseGUI.Models;
+    using NLMShared.Models;
+    using SkiaSharp;
 
     public interface ISession
     {
-        Task<(Bitmap, FilteringStatsModel)> Run(Bitmap raw);
+        Task<(SKBitmap, FilteringStatsModel)> Run(SKBitmap raw);
 
         Task Cancel();
     }

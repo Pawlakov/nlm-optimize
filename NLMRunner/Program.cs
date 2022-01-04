@@ -2,15 +2,13 @@
 {
     using System;
     using System.Diagnostics;
-    using System.Drawing;
-    using System.Drawing.Imaging;
     using System.IO;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
     using NLMRunner.NLM;
     using NLMShared.Dtos;
     using NLMShared.Models;
     using NLMShared.Pipes;
+    using SkiaSharp;
 
     public class Program
     {
@@ -26,7 +24,7 @@
                 Console.WriteLine("Odebrałęm konfigurację");
             };
 
-            Console.WriteLine("Próbuję połączyć się z serwerem...");
+            Console.WriteLine("Próbuję połączyć się z serwerem...");
             clientPipe.Connect();
             Console.WriteLine("Połączyłem się");
 
@@ -39,14 +37,14 @@
                 var implementationFile = string.IsNullOrWhiteSpace(config.LibraryPath) ? null : new FileInfo(config.LibraryPath);
                 using (var implementation = (IImplementation)(implementationFile != null ? new ExternalImplementation(implementationFile) : new DefaultImplementation()))
                 {
-                    var input = (Bitmap)null;
+                    var input = (SKBitmap)null;
                     using (var inputFile = new MemoryStream(config.InputFile))
                     {
-                        input = new Bitmap(inputFile);
+                        input = SKBitmap.Decode(inputFile);
                     }
 
                     var inputModel = BitmapModel.Create(input);
-                    var outputModel = BitmapModel.Create(inputModel.Width, inputModel.Height, inputModel.PixelFormat);
+                    var outputModel = BitmapModel.Create(inputModel.Width, inputModel.Height, inputModel.ColorType, inputModel.AlphaType);
 
                     Console.WriteLine("Rozpoczynam działanie filtra...");
                     var watch = Stopwatch.StartNew();
@@ -57,7 +55,7 @@
                     var output = outputModel.ToBitmap();
                     using (var outputFile = new MemoryStream())
                     {
-                        output.Save(outputFile, ImageFormat.Png);
+                        output.Encode(outputFile, SKEncodedImageFormat.Png, 100);
                         result.OutputFile = outputFile.ToArray();
                     }
 
@@ -67,6 +65,7 @@
             catch (Exception exception)
             {
                 Console.WriteLine("Złapałem wyjątek");
+                Console.WriteLine(exception);
                 result.Exception = exception;
             }
             finally

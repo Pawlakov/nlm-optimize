@@ -1,3 +1,6 @@
+.PHONY: all
+all: NLMBasic NLMBasicOpti NLMPlain NLMPlainOpti NLMGpgpu0 NLMGpgpu0Opti NLMGpgpu1 NLMGpgpu1Opti
+
 .PHONY: NLMBasic
 NLMBasic: NLMBasic.so
 	cp NLMBasic.so ../NLMBase

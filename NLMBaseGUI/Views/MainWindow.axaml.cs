@@ -117,7 +117,7 @@ namespace NLMBaseGUI.Views
                 .GetMessageBoxStandardWindow(new MessageBoxStandardParams
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
-                    ContentTitle = "Wyj�tek",
+                    ContentTitle = "Wyjątek",
                     ContentMessage = interaction.Input.ToString(),
                     Icon = global::MessageBox.Avalonia.Enums.Icon.Error,
                 });

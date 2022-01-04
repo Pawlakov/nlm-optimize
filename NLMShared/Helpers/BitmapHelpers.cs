@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using NLMShared.Models;
+    using SkiaSharp;
 
     public static class BitmapHelpers
     {
@@ -51,7 +53,7 @@
             return resultChannels;
         }
 
-        public static void WriteBitemapTheDumbWay(Bitmap bitmap, byte[] bytesWrapped, int channels, int width, int height, int stride)
+        public static void WriteBitemapTheDumbWay(SKBitmap bitmap, byte[] bytesWrapped, int channels, int width, int height, int stride)
         {
             for (var x = 0; x < width; ++x)
             {
@@ -60,16 +62,30 @@
                     switch (channels)
                     {
                         case 1:
-                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[(y * stride) + (x * 1) + 0], bytesWrapped[(y * stride) + (x * 1) + 0], (bytesWrapped[(y * stride) + x] * 1) + 0));
+                            bitmap.SetPixel(x, y, new SKColor(
+                                bytesWrapped[(y * stride) + (x * 1) + 0], 
+                                bytesWrapped[(y * stride) + (x * 1) + 0], 
+                                bytesWrapped[(y * stride) + (x * 1) + 0]));
                             break;
                         case 2:
-                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[(y * stride) + (x * 2) + 1], bytesWrapped[(y * stride) + (x * 2) + 0], bytesWrapped[(y * stride) + (x * 2) + 0], bytesWrapped[(y * stride) + (x * 2) + 0]));
+                            bitmap.SetPixel(x, y, new SKColor(
+                                bytesWrapped[(y * stride) + (x * 2) + 0], 
+                                bytesWrapped[(y * stride) + (x * 2) + 0], 
+                                bytesWrapped[(y * stride) + (x * 2) + 0], 
+                                bytesWrapped[(y * stride) + (x * 2) + 1]));
                             break;
                         case 3:
-                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[(y * stride) + (x * 3) + 2], bytesWrapped[(y * stride) + (x * 3) + 1], bytesWrapped[(y * stride) + (x * 3) + 0]));
+                            bitmap.SetPixel(x, y, new SKColor(
+                                bytesWrapped[(y * stride) + (x * 3) + 2], 
+                                bytesWrapped[(y * stride) + (x * 3) + 1], 
+                                bytesWrapped[(y * stride) + (x * 3) + 0]));
                             break;
                         case 4:
-                            bitmap.SetPixel(x, y, Color.FromArgb(bytesWrapped[(y * stride) + (x * 4) + 3], bytesWrapped[(y * stride) + (x * 4) + 2], bytesWrapped[(y * stride) + (x * 4) + 1], bytesWrapped[(y * stride) + (x * 4) + 0]));
+                            bitmap.SetPixel(x, y, new SKColor(
+                                bytesWrapped[(y * stride) + (x * 4) + 2], 
+                                bytesWrapped[(y * stride) + (x * 4) + 1], 
+                                bytesWrapped[(y * stride) + (x * 4) + 0], 
+                                bytesWrapped[(y * stride) + (x * 4) + 3]));
                             break;
                     }
                 }
@@ -106,6 +122,51 @@
 
             var ssim = new SSIM();
             return ssim.ComputeSSIM(firstSingleArray, secondSingleArray, width, height);
+        }
+
+        public static FilteringStatsModel CalculateStats(SKBitmap raw, SKBitmap altered, long time)
+        {
+            var mseResult = (float?)null;
+            var ssimResult = (float?)null;
+
+            if (raw != null)
+            {
+                var rawModel = BitmapModel.Create(raw);
+                var alteredModel = BitmapModel.Create(altered);
+
+                var rawArray = BitmapHelpers.WrapChannels(rawModel.Data, rawModel.Channels, rawModel.Width, rawModel.Height, rawModel.Length, rawModel.Stride);
+                var alteredArray = BitmapHelpers.WrapChannels(alteredModel.Data, alteredModel.Channels, alteredModel.Width, alteredModel.Height, alteredModel.Length, alteredModel.Stride);
+
+                if (alteredModel.Width == rawModel.Width && alteredModel.Height == rawModel.Height && alteredModel.Channels == rawModel.Channels)
+                {
+                    try
+                    {
+                        mseResult = BitmapHelpers.CalculateMSE(rawArray, alteredArray, alteredModel.Width, alteredModel.Height, alteredModel.Channels);
+                    }
+                    catch
+                    {
+                        mseResult = null;
+                    }
+
+                    try
+                    {
+                        ssimResult = BitmapHelpers.CalculateSSIM(rawArray, alteredArray, alteredModel.Width, alteredModel.Height, alteredModel.Channels);
+                    }
+                    catch
+                    {
+                        ssimResult = null;
+                    }
+                }
+            }
+
+            var stats = new FilteringStatsModel
+            {
+                Time = TimeSpan.FromMilliseconds(time),
+                MSE = mseResult,
+                SSIM = ssimResult,
+            };
+
+            return stats;
         }
 
         public class SSIM
