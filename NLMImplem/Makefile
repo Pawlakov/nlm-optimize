@@ -1,52 +1,57 @@
 .PHONY: all
-all: NLMBasic NLMBasicOpti NLMPlain NLMPlainOpti NLMGpgpu0 NLMGpgpu0Opti NLMGpgpu1 NLMGpgpu1Opti
+all: NLMPara NLMParaOpti NLM NLMOpti NLMGpgpu0 NLMGpgpu0Opti NLMGpgpu1 NLMGpgpu1Opti
 
-.PHONY: NLMBasic
-NLMBasic: NLMBasic.so
-	cp NLMBasic.so ./bin
-	rm -f NLMBasic.o NLMBasic.so
+.PHONY: NLMPara
+NLMPara: NLMPara.so
+	mkdir -p bin
+	cp NLMPara.so ./bin
+	rm -f NLMPara.o NLMPara.so
 
-NLMBasic.so: NLMBasic.o
-	g++ -shared -fopenmp -o NLMBasic.so NLMBasic.o
+NLMPara.so: NLMPara.o
+	g++ -shared -fopenmp -o NLMPara.so NLMPara.o
 
-NLMBasic.o: NLMBasic.cpp NLMBasic.h
-	g++ -c -Wall -Wextra -fpic -fopenmp NLMBasic.cpp
+NLMPara.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -Wall -Wextra -fpic -fopenmp -o NLMPara.o NLMBasic.cpp
 
-.PHONY: NLMBasicOpti
-NLMBasicOpti: NLMBasicOpti.so
-	cp NLMBasicOpti.so ./bin
-	rm -f NLMBasicOpti.o NLMBasicOpti.so
+.PHONY: NLMParaOpti
+NLMParaOpti: NLMParaOpti.so
+	mkdir -p bin
+	cp NLMParaOpti.so ./bin
+	rm -f NLMParaOpti.o NLMParaOpti.so
 
-NLMBasicOpti.so: NLMBasicOpti.o
-	g++ -shared -fopenmp -o NLMBasicOpti.so NLMBasicOpti.o
+NLMParaOpti.so: NLMParaOpti.o
+	g++ -shared -fopenmp -o NLMParaOpti.so NLMParaOpti.o
 
-NLMBasicOpti.o: NLMBasic.cpp NLMBasic.h
-	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp -o NLMBasicOpti.o NLMBasic.cpp
+NLMParaOpti.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -fopenmp -o NLMParaOpti.o NLMBasic.cpp
 
-.PHONY: NLMPlain
-NLMPlain: NLMPlain.so
-	cp NLMPlain.so ./bin
-	rm -f NLMPlain.o NLMPlain.so
+.PHONY: NLM
+NLM: NLM.so
+	mkdir -p bin
+	cp NLM.so ./bin
+	rm -f NLM.o NLM.so
 
-NLMPlain.so: NLMPlain.o
-	g++ -shared -o NLMPlain.so NLMPlain.o
+NLM.so: NLM.o
+	g++ -shared -o NLM.so NLM.o
 
-NLMPlain.o: NLMBasic.cpp NLMBasic.h
-	g++ -c -Wall -Wextra -fpic -o NLMPlain.o NLMBasic.cpp
+NLM.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -Wall -Wextra -fpic -o NLM.o NLMBasic.cpp
 
-.PHONY: NLMPlainOpti
-NLMPlainOpti: NLMPlainOpti.so
-	cp NLMPlainOpti.so ./bin
-	rm -f NLMPlainOpti.o NLMPlainOpti.so
+.PHONY: NLMOpti
+NLMOpti: NLMOpti.so
+	mkdir -p bin
+	cp NLMOpti.so ./bin
+	rm -f NLMOpti.o NLMOpti.so
 
-NLMPlainOpti.so: NLMPlainOpti.o
-	g++ -shared -o NLMPlainOpti.so NLMPlainOpti.o
+NLMOpti.so: NLMOpti.o
+	g++ -shared -o NLMOpti.so NLMOpti.o
 
-NLMPlainOpti.o: NLMBasic.cpp NLMBasic.h
-	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -o NLMPlainOpti.o NLMBasic.cpp
+NLMOpti.o: NLMBasic.cpp NLMBasic.h
+	g++ -c -O3 -funroll-loops -fomit-frame-pointer -fno-tree-pre -falign-loops -ffast-math -ftree-vectorize -Wall -Wextra -Wno-write-strings -Wno-deprecated -ansi -fpic -o NLMOpti.o NLMBasic.cpp
 
 .PHONY: NLMGpgpu0
 NLMGpgpu0: NLMGpgpu0.so
+	mkdir -p bin
 	cp NLMGpgpu0.so ./bin
 	rm -f NLMGpgpu0.hip.o NLMGpgpu0.so
 
@@ -58,6 +63,7 @@ NLMGpgpu0.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
 
 .PHONY: NLMGpgpu0Opti
 NLMGpgpu0Opti: NLMGpgpu0Opti.so
+	mkdir -p bin
 	cp NLMGpgpu0Opti.so ./bin
 	rm -f NLMGpgpu0Opti.hip.o NLMGpgpu0Opti.so
 
@@ -69,6 +75,7 @@ NLMGpgpu0Opti.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
 
 .PHONY: NLMGpgpu1
 NLMGpgpu1: NLMGpgpu1.so
+	mkdir -p bin
 	cp NLMGpgpu1.so ./bin
 	rm -f NLMGpgpu1.hip.o NLMGpgpu1.so
 
@@ -80,6 +87,7 @@ NLMGpgpu1.hip.o: NLMGpgpu1.hip.cpp NLMGpgpu1.hip.h
 	
 .PHONY: NLMGpgpu1Opti
 NLMGpgpu1Opti: NLMGpgpu1Opti.so
+	mkdir -p bin
 	cp NLMGpgpu1Opti.so ./bin
 	rm -f NLMGpgpu1Opti.hip.o NLMGpgpu1Opti.so
 
