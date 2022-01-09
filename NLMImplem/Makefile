@@ -3,8 +3,7 @@ all: NLMBasic NLMBasicOpti NLMPlain NLMPlainOpti NLMGpgpu0 NLMGpgpu0Opti NLMGpgp
 
 .PHONY: NLMBasic
 NLMBasic: NLMBasic.so
-	cp NLMBasic.so ../NLMBase
-	cp NLMBasic.so ../NLMBase/bin/Release/net5.0
+	cp NLMBasic.so ./bin
 	rm -f NLMBasic.o NLMBasic.so
 
 NLMBasic.so: NLMBasic.o
@@ -15,8 +14,7 @@ NLMBasic.o: NLMBasic.cpp NLMBasic.h
 
 .PHONY: NLMBasicOpti
 NLMBasicOpti: NLMBasicOpti.so
-	cp NLMBasicOpti.so ../NLMBase
-	cp NLMBasicOpti.so ../NLMBase/bin/Release/net5.0
+	cp NLMBasicOpti.so ./bin
 	rm -f NLMBasicOpti.o NLMBasicOpti.so
 
 NLMBasicOpti.so: NLMBasicOpti.o
@@ -27,8 +25,7 @@ NLMBasicOpti.o: NLMBasic.cpp NLMBasic.h
 
 .PHONY: NLMPlain
 NLMPlain: NLMPlain.so
-	cp NLMPlain.so ../NLMBase
-	cp NLMPlain.so ../NLMBase/bin/Release/net5.0
+	cp NLMPlain.so ./bin
 	rm -f NLMPlain.o NLMPlain.so
 
 NLMPlain.so: NLMPlain.o
@@ -39,8 +36,7 @@ NLMPlain.o: NLMBasic.cpp NLMBasic.h
 
 .PHONY: NLMPlainOpti
 NLMPlainOpti: NLMPlainOpti.so
-	cp NLMPlainOpti.so ../NLMBase
-	cp NLMPlainOpti.so ../NLMBase/bin/Release/net5.0
+	cp NLMPlainOpti.so ./bin
 	rm -f NLMPlainOpti.o NLMPlainOpti.so
 
 NLMPlainOpti.so: NLMPlainOpti.o
@@ -51,8 +47,7 @@ NLMPlainOpti.o: NLMBasic.cpp NLMBasic.h
 
 .PHONY: NLMGpgpu0
 NLMGpgpu0: NLMGpgpu0.so
-	cp NLMGpgpu0.so ../NLMBase
-	cp NLMGpgpu0.so ../NLMBase/bin/Release/net5.0
+	cp NLMGpgpu0.so ./bin
 	rm -f NLMGpgpu0.hip.o NLMGpgpu0.so
 
 NLMGpgpu0.so: NLMGpgpu0.hip.o
@@ -63,8 +58,7 @@ NLMGpgpu0.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
 
 .PHONY: NLMGpgpu0Opti
 NLMGpgpu0Opti: NLMGpgpu0Opti.so
-	cp NLMGpgpu0Opti.so ../NLMBase
-	cp NLMGpgpu0Opti.so ../NLMBase/bin/Release/net5.0
+	cp NLMGpgpu0Opti.so ./bin
 	rm -f NLMGpgpu0Opti.hip.o NLMGpgpu0Opti.so
 
 NLMGpgpu0Opti.so: NLMGpgpu0Opti.hip.o
@@ -75,8 +69,7 @@ NLMGpgpu0Opti.hip.o: NLMGpgpu0.hip.cpp NLMGpgpu0.hip.h
 
 .PHONY: NLMGpgpu1
 NLMGpgpu1: NLMGpgpu1.so
-	cp NLMGpgpu1.so ../NLMBase
-	cp NLMGpgpu1.so ../NLMBase/bin/Release/net5.0
+	cp NLMGpgpu1.so ./bin
 	rm -f NLMGpgpu1.hip.o NLMGpgpu1.so
 
 NLMGpgpu1.so: NLMGpgpu1.hip.o
@@ -84,10 +77,10 @@ NLMGpgpu1.so: NLMGpgpu1.hip.o
 
 NLMGpgpu1.hip.o: NLMGpgpu1.hip.cpp NLMGpgpu1.hip.h
 	hipcc -c -Wall -Wextra -fpic --stdlib=libstdc++ NLMGpgpu1.hip.cpp
+	
 .PHONY: NLMGpgpu1Opti
 NLMGpgpu1Opti: NLMGpgpu1Opti.so
-	cp NLMGpgpu1Opti.so ../NLMBase
-	cp NLMGpgpu1Opti.so ../NLMBase/bin/Release/net5.0
+	cp NLMGpgpu1Opti.so ./bin
 	rm -f NLMGpgpu1Opti.hip.o NLMGpgpu1Opti.so
 
 NLMGpgpu1Opti.so: NLMGpgpu1Opti.hip.o
