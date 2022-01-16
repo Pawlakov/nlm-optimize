@@ -169,7 +169,7 @@
             return stats;
         }
 
-        public class SSIM
+        private class SSIM
         {
             private const double K1 = 0.01;
             private const double K2 = 0.03;

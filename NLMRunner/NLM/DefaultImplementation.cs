@@ -4,7 +4,6 @@ namespace NLMRunner.NLM
     using System.Threading;
     using System.Threading.Tasks;
     using NLMShared.Models;
-    using NLMShared.NLM;
 
     public unsafe class DefaultImplementation
         : IImplementation

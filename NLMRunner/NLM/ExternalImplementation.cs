@@ -4,7 +4,6 @@
     using System.IO;
     using System.Runtime.InteropServices;
     using NLMShared.Models;
-    using NLMShared.NLM;
 
     public class ExternalImplementation
         : IImplementation
