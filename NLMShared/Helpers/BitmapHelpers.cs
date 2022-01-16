@@ -53,45 +53,6 @@
             return resultChannels;
         }
 
-        public static void WriteBitemapTheDumbWay(SKBitmap bitmap, byte[] bytesWrapped, int channels, int width, int height, int stride)
-        {
-            for (var x = 0; x < width; ++x)
-            {
-                for (var y = 0; y < height; ++y)
-                {
-                    switch (channels)
-                    {
-                        case 1:
-                            bitmap.SetPixel(x, y, new SKColor(
-                                bytesWrapped[(y * stride) + (x * 1) + 0], 
-                                bytesWrapped[(y * stride) + (x * 1) + 0], 
-                                bytesWrapped[(y * stride) + (x * 1) + 0]));
-                            break;
-                        case 2:
-                            bitmap.SetPixel(x, y, new SKColor(
-                                bytesWrapped[(y * stride) + (x * 2) + 0], 
-                                bytesWrapped[(y * stride) + (x * 2) + 0], 
-                                bytesWrapped[(y * stride) + (x * 2) + 0], 
-                                bytesWrapped[(y * stride) + (x * 2) + 1]));
-                            break;
-                        case 3:
-                            bitmap.SetPixel(x, y, new SKColor(
-                                bytesWrapped[(y * stride) + (x * 3) + 2], 
-                                bytesWrapped[(y * stride) + (x * 3) + 1], 
-                                bytesWrapped[(y * stride) + (x * 3) + 0]));
-                            break;
-                        case 4:
-                            bitmap.SetPixel(x, y, new SKColor(
-                                bytesWrapped[(y * stride) + (x * 4) + 2], 
-                                bytesWrapped[(y * stride) + (x * 4) + 1], 
-                                bytesWrapped[(y * stride) + (x * 4) + 0], 
-                                bytesWrapped[(y * stride) + (x * 4) + 3]));
-                            break;
-                    }
-                }
-            }
-        }
-
         public static float CalculateMSE(byte[] firstArray, byte[] secondArray, int width, int height, int channels)
         {
             var size = width * height * channels;

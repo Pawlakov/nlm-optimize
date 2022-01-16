@@ -72,9 +72,9 @@
         public SKBitmap ToBitmap()
         {
             var bitmap = new SKBitmap(this.Width, this.Height, this.ColorType, this.AlphaType);
-
+            var origin = bitmap.GetPixels();
             var array = BitmapHelpers.WrapChannels(this.Data, this.Channels, this.Width, this.Height, this.Length, this.Stride);
-            BitmapHelpers.WriteBitemapTheDumbWay(bitmap, array, this.Channels, this.Width, this.Height, this.Stride);
+            Marshal.Copy(array, 0, origin, this.Length);
 
             return bitmap;
         }
