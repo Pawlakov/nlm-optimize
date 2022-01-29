@@ -393,7 +393,7 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 if (x != null)
                                 {
-                                    using (var stream = File.OpenWrite(x)) 
+                                    using (var stream = File.OpenWrite(x))
                                     {
                                         var format = this.GetFileFormatFromName(x);
                                         var data = this.noisyImage.Encode(format, 100);
@@ -465,7 +465,7 @@ namespace NLMBaseGUI.ViewModels
                             {
                                 if (x != null)
                                 {
-                                    using (var stream = File.OpenWrite(x)) 
+                                    using (var stream = File.OpenWrite(x))
                                     {
                                         var format = this.GetFileFormatFromName(x);
                                         var data = this.filteredImage.Encode(format, 100);
@@ -623,7 +623,7 @@ namespace NLMBaseGUI.ViewModels
             this.BlockRadius = this.ReccomendedBlockRadius;
             this.FilterParam = this.ReccomendedFilterParam;
         }
-    
+
         private SKEncodedImageFormat GetFileFormatFromName(string fileName)
         {
             if (fileName.EndsWith(".PNG", StringComparison.CurrentCultureIgnoreCase))

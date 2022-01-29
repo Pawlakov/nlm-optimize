@@ -122,7 +122,7 @@ namespace NLMBaseGUI.Views
                     Icon = global::MessageBox.Avalonia.Enums.Icon.Error,
                 });
 
-            await msBoxStandardWindow.Show();
+            await msBoxStandardWindow.ShowDialog(this);
         }
     }
 }
