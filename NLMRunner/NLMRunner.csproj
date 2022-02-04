@@ -27,6 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\NLMImplemFSharp\NLMImplemFSharp.fsproj" />
 		<ProjectReference Include="..\NLMShared\NLMShared.csproj" />
 	</ItemGroup>
 
